@@ -23,6 +23,7 @@ from services.elevenlabs import create_interview_agent, get_signed_url, sync_tra
 from services.tts_cache import prewarm as tts_prewarm
 from services.feedback import generate_feedback
 from services.question_planner import plan_questions
+from redis_client import get_redis
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,19 @@ async def create_session(
     background_tasks: BackgroundTasks,
     clerk_user_id: str = Depends(RateLimiter(5, 60, "create_session")),
 ):
+    # Validate before insert to avoid orphan sessions on 400 errors
+    from services.question_planner import plan_resume_questions
+    if body.mode == "resume" and not body.resume_text:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Resume text is required for resume mode")
+    raw_problem = None
+    if body.problem_id:
+        raw_problem = load_problem(body.problem_id)
+        if not raw_problem or not raw_problem.get("test_cases"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Problem '{body.problem_id}' has no test cases. Call POST /api/problems/{{slug}}/generate-tests first.",
+            )
+
     session = InterviewSession(
         clerk_user_id=clerk_user_id,
         mode=body.mode,
@@ -64,25 +78,16 @@ async def create_session(
     session_id = str(result.inserted_id)
     session.id = session_id
 
-    from services.question_planner import plan_resume_questions
     if body.mode == "resume":
-        if not body.resume_text:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Resume text is required for resume mode")
         questions = await plan_resume_questions(session_id, body.resume_text, body.duration_minutes)
-    elif body.problem_id:
-        raw = load_problem(body.problem_id)
-        if not raw or not raw.get("test_cases"):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Problem '{body.problem_id}' has no test cases. Call POST /api/problems/{{slug}}/generate-tests first.",
-            )
+    elif raw_problem:
         questions = [Question(
             session_id=session_id,
             order=0,
             type=QuestionType.technical,
-            prompt=raw.get("prompt", raw.get("description", "")),
+            prompt=raw_problem.get("prompt", raw_problem.get("description", "")),
             follow_up_tree=[],
-            coding_problem_id=raw["id"],
+            coding_problem_id=raw_problem["id"],
         )]
     else:
         questions = plan_questions(session_id, body.mode, body.difficulty, body.duration_minutes)
@@ -243,6 +248,12 @@ async def patch_session(
     # Generate feedback whenever a session ends (with or without ElevenLabs)
     if session_completed:
         background_tasks.add_task(generate_feedback, session_id)
+
+    if session_completed:
+        try:
+            await get_redis().delete(f"session:{session_id}:state")
+        except Exception as exc:
+            logger.warning("Failed to delete session state from Redis: %s", exc)
 
     return session_to_response(doc)
 

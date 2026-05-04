@@ -91,12 +91,14 @@ async def list_problems(
     limit: int = Query(50, ge=1, le=200),
     skip: int = Query(0, ge=0),
     difficulty: str = "all",
+    clerk_user_id: str = Depends(require_auth),
 ):
     """Return paginated problem list served from MongoDB.
 
     Falls back to alfa-leetcode-api only when the catalog hasn't been seeded yet
-    (fewer than _CATALOG_THRESHOLD problems in the DB).
+    (fewer than _CATALOG_THRESHOLD problems total in the DB).
     """
+    total_seeded = db.problems.count_documents({})
     diff_filter = difficulty.lower() if difficulty != "all" else None
     query = {}
     if diff_filter:
@@ -104,7 +106,7 @@ async def list_problems(
 
     db_all = list(db.problems.find(query, {"_id": 0}))
 
-    if len(db_all) >= _CATALOG_THRESHOLD:
+    if total_seeded >= _CATALOG_THRESHOLD:
         combined = [_db_to_list_item(p) for p in db_all]
         total = len(combined)
         return ProblemListResponse(problems=combined[skip: skip + limit], total=total)
@@ -202,7 +204,7 @@ async def generate_problem_tests(slug: str, clerk_user_id: str = Depends(require
 
 
 @router.get("/{slug}", response_model=ProblemDetail)
-async def get_problem(slug: str):
+async def get_problem(slug: str, clerk_user_id: str = Depends(require_auth)):
     """Return full problem detail: DB first, then alfa-leetcode-api."""
     local = db.problems.find_one({"id": slug}, {"_id": 0})
     if local:

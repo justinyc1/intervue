@@ -13,7 +13,7 @@
 
 ## Overview
 
-**TODO "Don’t just prep. Practice for real." "Practice for interviews, not just questions."** Intervue is a live, voice-first mock interview platform that simulates the nuance and pressure of real technical and behavioral interviews. By blending real-time web intelligence with adaptive AI, we help candidates stop rehearsing and start performing.
+**Don’t just prep. Practice for real.** Intervue is a live, voice-first mock interview platform that simulates the nuance and pressure of real technical and behavioral interviews. By blending real-time web intelligence with adaptive AI, we help candidates stop rehearsing and start performing.
 
 
 ## Inspiration
@@ -31,61 +31,76 @@ Most interview prep tools are static: you read a question on a screen and type a
 
 * **Frontend:** React, TypeScript, Tailwind CSS, Clerk
 * **Backend:** FastAPI, Python, WebSocket, Judge0 (code execution)
-* **Voice/AI:** ElevenLabs, Tavily, Groq (Llama 3.1 8B), Featherless
-* **Database:** MongoDB
+* **Voice/AI:** ElevenLabs, Tavily, Groq (Llama 3.1 8B), Featherless 
+* **Database:** MongoDB 
+* **Cache/State:** Redis (problem catalog cache, rate limiting, session orchestration state)
 * **Storage:** AWS S3 (resumes, code snapshots, feedback reports)
+* **Infrastructure:** Docker, NGINX
 
 
 ## Getting Started
 
 ### Prerequisites
-* Python 3.10+, Node 18+
 * API Keys for:
     - Clerk (publishable + secret)
     - ElevenLabs
     - Groq (primary LLM) or Featherless (fallback)
     - Judge0 (via RapidAPI)
-    - MongoDB
+    - MongoDB Atlas URI
     - Tavily
     - AWS S3 (access key, secret key, bucket name) — optional, needed for resume upload and code snapshots
+* Redis, or Docker Compose for the bundled Redis service
 
 ### Installation
 1.  **Clone the repo:**
     ```bash
-    git clone https://github.com/justinyc1/hack-brooklyn-2026.git
-    cd hack-brooklyn-2026
+    git clone https://github.com/justinyc1/intervue.git
+    cd intervue
     ```
-2.  **Setup Environment:**
+2.  **Set up environment:**
     ```bash
-    #frontend: 
-    cp .env.example .env
-    # open .env and replace with your API keys
-    
-    #backend: 
-    cp .env.example .env
-    # open .env and replace with your API keys
-    ```
-3.  **Install dependencies:**
-    ```bash
-    # frontend:
-    cd frontend
-    npm install
+    # Backend secrets (runtime)
+    cp backend/.env.example backend/.env
+    # open backend/.env and fill in your API keys
+    # set REDIS_URL=redis://localhost:6379 for local dev
 
-    # backend:
-    cd backend
-    python -m venv .venv
-    .venv\Scripts\Activate.ps1
-    pip install -r requirements.txt
+    # Frontend build vars (Docker only)
+    # create .env at the repo root and set VITE_CLERK_PUBLISHABLE_KEY
+    # Docker Compose uses REDIS_URL=redis://redis:6379 internally
     ```
 
-5.  **Run the App:**
-    ```bash
-    # frontend:
-    npm run dev
+### Option A — Docker (recommended)
 
-    # backend:
-    uvicorn main:app --reload
-    ```
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+```bash
+docker compose up --build
+```
+
+- Frontend → http://localhost:5173
+- Backend API → http://localhost:8000
+
+### Option B — Local dev
+
+Requires Python 3.12+ and Node 18+.
+
+```bash
+# Redis
+docker run --rm -p 6379:6379 redis:7
+
+# Backend
+cd backend
+python -m venv .venv
+.venv\Scripts\Activate.ps1   # Windows
+# source .venv/bin/activate  # macOS/Linux
+pip install -r requirements.txt
+uvicorn main:app --reload
+
+# Frontend (separate terminal)
+cd frontend
+npm install
+npm run dev   # http://localhost:5173
+```
 
 ## Diagrams
 ### User Flow:

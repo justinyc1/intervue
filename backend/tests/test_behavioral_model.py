@@ -69,8 +69,13 @@ def test_create_behavioral_session_endpoint(monkeypatch):
     mock_db.questions.insert_many.return_value.inserted_ids = []
     mock_db.sessions.find_one.return_value = fake_session_doc
 
+    mock_redis = AsyncMock()
+    mock_redis.incr.return_value = 1
+    mock_redis.expire.return_value = True
+
     with (
         patch("routes.behavioral.db", mock_db),
+        patch("auth.rate_limit.get_redis", return_value=mock_redis),
         patch("routes.behavioral.plan_behavioral_questions", new=AsyncMock(return_value=[])),
         patch("routes.behavioral.create_behavioral_agent", new=AsyncMock(return_value=("agent_abc", "Hello! Thank you for joining today.", {"voice_id": "EXAVITQu4vr4xnSDxMaL", "stability": 0.65, "similarity_boost": 0.80}))),
     ):

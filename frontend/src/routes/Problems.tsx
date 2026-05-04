@@ -456,7 +456,7 @@ export function Problems() {
               slug={selectedSlug}
               onClose={() => setSelectedSlug(null)}
               onPractice={(difficulty) => navigate(
-                `/setup?type=technical&role=mid&company=amazon&difficulty=${difficulty}&problem_id=${selectedSlug}`
+                `/setup?type=technical&difficulty=${difficulty}&problem_id=${selectedSlug}`
               )}
               isSolved={solvedSlugs.has(selectedSlug)}
               onSolve={() => setSolvedSlugs((prev) => new Set([...prev, selectedSlug]))}
