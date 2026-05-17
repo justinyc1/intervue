@@ -251,9 +251,6 @@ function FeatureRow({ k, title, body }: { k: string; title: string; body: string
 // ── Companies marquee ────────────────────────────────────
 const COMPANIES = ['Google', 'Meta', 'Amazon', 'Apple', 'Microsoft', 'Stripe', 'Netflix', 'Airbnb', 'OpenAI', 'Anthropic', 'Databricks', 'Figma']
 
-// ── Social proof avatars ─────────────────────────────────
-const AVATAR_COLORS = ['rgba(34,197,94,0.3)', 'rgba(130,170,255,0.3)', 'rgba(248,113,113,0.3)', 'rgba(251,191,36,0.3)']
-
 // ── Main component ───────────────────────────────────────
 export function Home() {
   const navigate = useNavigate()
