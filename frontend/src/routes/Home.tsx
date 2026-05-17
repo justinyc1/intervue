@@ -355,20 +355,6 @@ export function Home() {
                   ▶︎ See sample feedback
                 </button>
               </motion.div>
-
-              {/* Social proof */}
-              <motion.div variants={fadeUp} style={{ display:'flex', alignItems:'center', gap:24, marginTop:40, color:'#8892a4', fontSize:13 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                  <span style={{ display:'inline-flex' }}>
-                    {AVATAR_COLORS.map((bg, i) => (
-                      <span key={i} style={{ width:24, height:24, borderRadius:99, background:bg, border:'2px solid #0c0e14', marginLeft:i?-8:0, display:'inline-block' }} />
-                    ))}
-                  </span>
-                  <span><strong style={{ color:'#e2e8f4' }}>11,400+</strong> mocks run this week</span>
-                </div>
-                <div style={{ width:1, height:14, background:'rgba(255,255,255,0.1)' }} />
-                <div>★★★★★ <strong style={{ color:'#e2e8f4' }}>4.9</strong> · ProductHunt #1</div>
-              </motion.div>
             </div>
 
             {/* Right: animated artifacts */}
