@@ -18,7 +18,7 @@ const fadeUp = {
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
   const styles: Record<string, string> = {
     easy: 'text-moss bg-moss/10 border-moss/20',
-    medium: 'text-[#F97316] bg-[#F97316]/10 border-[#F97316]/20',
+    medium: 'text-[#f59e0b] bg-[#f59e0b]/10 border-[#f59e0b]/20',
     hard: 'text-crimson bg-crimson/10 border-crimson/20',
   }
   return (
@@ -456,7 +456,7 @@ export function Problems() {
               slug={selectedSlug}
               onClose={() => setSelectedSlug(null)}
               onPractice={(difficulty) => navigate(
-                `/setup?type=technical&role=mid&company=amazon&difficulty=${difficulty}&problem_id=${selectedSlug}`
+                `/setup?type=technical&difficulty=${difficulty}&problem_id=${selectedSlug}`
               )}
               isSolved={solvedSlugs.has(selectedSlug)}
               onSolve={() => setSolvedSlugs((prev) => new Set([...prev, selectedSlug]))}

@@ -1,7 +1,8 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from fastapi.testclient import TestClient
 
+import redis_client
 from main import app
 from auth.clerk import require_auth
 from db import db as real_db
@@ -16,11 +17,28 @@ def override_require_auth():
 
 
 @pytest.fixture
-def client():
+def mock_redis():
+    mock = AsyncMock()
+    mock.get.return_value = None
+    mock.setex.return_value = True
+    mock.incr.return_value = 1
+    mock.expire.return_value = True
+    mock.hset.return_value = 1
+    mock.hgetall.return_value = {}
+    mock.hincrby.return_value = 1
+    mock.delete.return_value = 1
+    mock.expireat.return_value = True
+    return mock
+
+
+@pytest.fixture
+def client(mock_redis):
     app.dependency_overrides[require_auth] = override_require_auth
     with TestClient(app) as c:
+        redis_client._redis = mock_redis
         yield c
     app.dependency_overrides.clear()
+    redis_client._redis = None
 
 
 @pytest.fixture
@@ -30,6 +48,5 @@ def mock_db(monkeypatch):
     try:
         monkeypatch.setattr("routes.code.db", mock)
     except (ImportError, AttributeError):
-        # routes.code doesn't exist yet; this is OK since mock_db is only used by future tests
         pass
     return mock

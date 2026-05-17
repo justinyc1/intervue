@@ -17,10 +17,11 @@ This document defines the technical architecture for a live mock interview platf
 The system is composed of **4 main layers**:
 
 ## 1. Frontend
-- React + TypeScript + Tailwind  
+- React + TypeScript + Tailwind CSS v3 (Vite)  
 - Interview UI (coding + voice)  
 - WebSocket client for real-time interaction  
 - Auth via Clerk  
+- Served by nginx in production (Docker); Vite dev server locally  
 
 ## 2. Backend & Business Logic (FastAPI)
 - Central API gateway  
@@ -34,7 +35,13 @@ The system is composed of **4 main layers**:
 - alfa-leetcode-api → LeetCode problem catalog  
 
 ## 4. Database
-- MongoDB → persistent storage  
+- MongoDB Atlas → persistent storage  
+
+## 5. Infrastructure
+- Docker + Docker Compose — containerizes backend (Python/uvicorn), frontend (nginx), and Redis  
+- nginx — serves the Vite static build; handles SPA routing (`try_files`)  
+- Redis — shared cache and ephemeral state layer; runs as `redis:alpine` in the compose stack  
+- `VITE_API_URL` build arg controls which backend the frontend bundle targets  
 
 ---
 
@@ -216,12 +223,24 @@ Handles **user-level insights**
 - `feedback` — generated feedback reports  
 - `problems` — LeetCode problems enriched with test cases + starter code  
 - `solved_problems` — per-user solved problem tracking  
-- `rate_limits` — TTL-indexed per-user rate limit counters  
 
 ### Why MongoDB
 - Flexible schema  
 - Fits nested interview data  
 - Good for transcripts + JSON feedback  
+
+## Redis
+
+### Stores:
+- `problems:catalog` — JSON-serialized problem list from alfa-leetcode-api (TTL 1 h)
+- `problems:detail:{slug}` — JSON-serialized per-problem detail (TTL 6 h)
+- `ratelimit:{scope}:{user_id}` — sliding-window request counter per user per route (TTL = window seconds)
+- `session:{id}:state` — hash of per-session orchestration state (`question_index`, `silence_count`, `timer_started_at`); TTL = session duration + 1 h
+
+All Redis calls are wrapped in `try/except`; on failure the backend logs a warning and falls through to the primary data source, so the app continues to work without Redis.
+
+### Connection
+Initialized once at app startup via `backend/redis_client.py` (`init_redis` / `get_redis` / `close_redis`). The compose stack injects `REDIS_URL=redis://redis:6379`; local dev without compose defaults to `redis://localhost:6379`.
 
 ## AWS S3
 
@@ -346,3 +365,33 @@ Each provider is wrapped:
 
 - REST → setup, data fetch  
 - WebSocket / streaming → live interview  
+
+---
+
+# 8. Deployment
+
+## Containers
+
+| Service  | Image base       | Exposed port | Notes                              |
+|----------|------------------|--------------|------------------------------------|
+| backend  | python:3.12-slim | 8000         | uvicorn, reads `backend/.env`      |
+| frontend | nginx:alpine     | 80           | Vite static build; SPA routing     |
+| redis    | redis:alpine     | 6379         | ephemeral cache + session state    |
+
+## Docker Compose (local)
+
+```bash
+docker compose up --build
+```
+
+Frontend → `http://localhost`, Backend API → `http://localhost:8000`
+
+## Environment
+
+Backend secrets are injected at **runtime** via `backend/.env` (never baked into the image).  
+`VITE_API_URL` is a **build-time** arg; the compiled JS bundle embeds the value so it must be set before `docker compose build`.
+
+```
+VITE_API_URL=http://localhost:8000   # default (local docker compose)
+VITE_API_URL=https://intervue.org    # production override
+```

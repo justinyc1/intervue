@@ -24,12 +24,12 @@ function MetricRing({ label, score }: { label: string; score: number }) {
   const r = 32
   const circ = 2 * Math.PI * r
   const offset = circ * (1 - pct)
-  const color = pct >= 0.75 ? '#7E9E5C' : pct >= 0.55 ? '#FF6B35' : '#B23A3A'
+  const color = pct >= 0.75 ? '#4ade80' : pct >= 0.55 ? '#f59e0b' : '#f87171'
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="relative h-20 w-20">
         <svg className="-rotate-90" width="80" height="80" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(250,247,242,0.06)" strokeWidth="4" />
+          <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
           <motion.circle cx="40" cy="40" r={r} fill="none" stroke={color} strokeWidth="4"
             strokeDasharray={circ} initial={{ strokeDashoffset: circ }}
             animate={{ strokeDashoffset: offset }} transition={{ duration: 1.2, delay: 0.3, ease: 'easeOut' }}

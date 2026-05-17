@@ -208,10 +208,10 @@ async def generate_full_problem(problem: dict) -> dict:
     constraints_block = "\n".join(f"  - {c}" for c in constraints) if constraints else "  (none listed)"
 
     prompt = _FULL_PROBLEM_TEMPLATE.format(
-        title=_escape_braces(problem.get("title", "")),
-        description=_escape_braces(problem.get("description", "")),
-        examples_block=_escape_braces(examples_block),
-        constraints_block=_escape_braces(constraints_block),
+        title=problem.get("title", ""),
+        description=problem.get("description", ""),
+        examples_block=examples_block,
+        constraints_block=constraints_block,
     )
 
     _LANG_DEFAULTS = {

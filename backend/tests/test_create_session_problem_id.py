@@ -50,11 +50,11 @@ def _fake_verify(token):
     return {"sub": USER_ID}
 
 
-def _make_rate_limit_db():
-    """Return a mock db for auth.rate_limit that always allows requests."""
-    mock = MagicMock()
-    mock.rate_limits.count_documents.return_value = 0
-    mock.rate_limits.insert_one.return_value = MagicMock()
+def _make_mock_redis():
+    """Return a mock Redis that allows rate limit checks."""
+    mock = AsyncMock()
+    mock.incr.return_value = 1
+    mock.expire.return_value = True
     return mock
 
 
@@ -65,7 +65,7 @@ def test_create_session_with_problem_id_uses_specific_problem():
     with patch("auth.clerk.verify_token", side_effect=_fake_verify), \
          patch("auth.clerk._upsert_user"), \
          patch("routes.interviews.db") as mock_db, \
-         patch("auth.rate_limit.db", _make_rate_limit_db()), \
+         patch("auth.rate_limit.get_redis", return_value=_make_mock_redis()), \
          patch("routes.interviews.plan_questions", mock_q_planner), \
          patch("routes.interviews.load_problem", mock_load), \
          patch("routes.interviews.create_interview_agent", new=AsyncMock(return_value=(None, "", {}))), \
@@ -93,7 +93,7 @@ def test_create_session_without_problem_id_calls_planner():
     with patch("auth.clerk.verify_token", side_effect=_fake_verify), \
          patch("auth.clerk._upsert_user"), \
          patch("routes.interviews.db") as mock_db, \
-         patch("auth.rate_limit.db", _make_rate_limit_db()), \
+         patch("auth.rate_limit.get_redis", return_value=_make_mock_redis()), \
          patch("routes.interviews.plan_questions", mock_q_planner), \
          patch("routes.interviews.create_interview_agent", new=AsyncMock(return_value=(None, "", {}))), \
          patch("services.tts_cache.prewarm", new=AsyncMock()):

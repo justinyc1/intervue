@@ -47,54 +47,30 @@ function drillsFromStrings(raw: string[]): DrillUI[] {
   })
 }
 
-function MetricRing({ label, score, max }: MetricScore) {
-  const pct = score / max
-  const r = 32
-  const circ = 2 * Math.PI * r
-  const offset = circ * (1 - pct)
-  const color = pct >= 0.75 ? '#7E9E5C' : pct >= 0.55 ? '#FF6B35' : '#B23A3A'
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="relative h-20 w-20">
-        <svg className="-rotate-90" width="80" height="80" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(250,247,242,0.06)" strokeWidth="4" />
-          <motion.circle cx="40" cy="40" r={r} fill="none" stroke={color} strokeWidth="4"
-            strokeDasharray={circ} initial={{ strokeDashoffset: circ }}
-            animate={{ strokeDashoffset: offset }} transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
-            strokeLinecap="round" />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="font-mono text-sm font-medium text-paper">{score}</span>
-        </div>
-      </div>
-      <p className="font-mono text-[10px] uppercase tracking-widest text-paper-faint">{label}</p>
-    </div>
-  )
-}
 
 function QuestionAccordion({ qf, idx }: { qf: QuestionFeedbackUI; idx: number }) {
   const [open, setOpen] = useState(idx === 0)
   return (
-    <div className={cn('rounded-md border transition-all duration-200', open ? 'border-ember/20 bg-ink-900' : 'border-ink-700/60 bg-ink-900 hover:border-ink-600')}>
+    <div className={cn('rounded-xl border transition-all duration-200', open ? 'border-ember/25 bg-ink-900' : 'border-ink-700/60 bg-ink-900 hover:border-ink-600')}>
       <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between p-5 text-left">
         <div className="flex items-center gap-4">
           <span className="font-mono text-xs text-paper-faint">Q{String(idx + 1).padStart(2, '0')}</span>
           <p className="text-sm font-medium text-paper line-clamp-1">{qf.questionText}</p>
         </div>
         <div className="flex items-center gap-3 ml-4 shrink-0">
-          <span className={cn('font-mono text-sm font-semibold', qf.score >= 75 ? 'text-moss' : qf.score >= 55 ? 'text-ember' : 'text-crimson')}>{qf.score}</span>
+          <span className={cn('font-display text-sm font-semibold', qf.score >= 75 ? 'text-moss' : qf.score >= 55 ? 'text-ember' : 'text-crimson')}>{qf.score}</span>
           <span className={cn('font-mono text-xs text-paper-faint transition-transform duration-200', open && 'rotate-180')}>▾</span>
         </div>
       </button>
       {open && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}
-          className="border-t border-ink-700/50 p-5 space-y-5">
+          className="border-t border-ink-700/40 p-5 space-y-5">
           {qf.evidenceSpans.length > 0 && (
             <div>
               <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-paper-faint">Evidence from your answer</p>
               <div className="space-y-2">
                 {qf.evidenceSpans.map((span, i) => (
-                  <div key={i} className="rounded-sm border-l-2 border-ember/50 bg-ember/5 px-4 py-3">
+                  <div key={i} className="rounded-lg border-l-2 border-ember/50 bg-ember/5 px-4 py-3">
                     <p className="mb-1 text-sm text-paper italic">"{span.text}"</p>
                     {span.context && <p className="font-mono text-[10px] text-paper-faint">{span.context}</p>}
                   </div>
@@ -119,7 +95,7 @@ function QuestionAccordion({ qf, idx }: { qf: QuestionFeedbackUI; idx: number })
           {qf.betterAnswer && (
             <div>
               <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-paper-faint">Stronger answer</p>
-              <p className="rounded-sm border border-ink-700/50 bg-ink-800 px-4 py-3 text-sm leading-relaxed text-paper-dim italic">"{qf.betterAnswer}"</p>
+              <p className="rounded-lg border border-ink-700/50 bg-ink-800/50 px-4 py-3 text-sm leading-relaxed text-paper-dim italic">"{qf.betterAnswer}"</p>
             </div>
           )}
         </motion.div>
@@ -140,10 +116,10 @@ function CodeTimeline({ snapshots, idx, onIdxChange }: {
   const timeLabel = ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 
   return (
-    <div className="rounded-md border border-ink-700/60 bg-ink-900 overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-ink-700/60 bg-ink-900 shadow-card">
       <div className="flex items-center justify-between border-b border-ink-700/60 px-5 py-3">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-paper-faint">Code Timeline</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-paper-faint">Code Evolution</p>
           <p className="mt-0.5 font-mono text-xs text-paper-dim">
             Snapshot {idx + 1} of {snapshots.length} · {snap.language} · {timeLabel}
           </p>
@@ -175,7 +151,7 @@ function CodeTimeline({ snapshots, idx, onIdxChange }: {
           options={{
             readOnly: true,
             fontSize: 12,
-            fontFamily: '"JetBrains Mono", monospace',
+            fontFamily: '"Geist Mono", "JetBrains Mono", monospace',
             lineHeight: 1.6,
             padding: { top: 12, bottom: 12 },
             minimap: { enabled: false },
@@ -320,48 +296,108 @@ export function Feedback() {
     betterAnswer: qf.better_answer_example ?? undefined,
   }))
 
+  const sessionDate = new Date(report.generated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12">
-      <motion.div variants={stagger} initial="hidden" animate="show">
-        <motion.div variants={fadeUp} className="mb-10">
-          <p className="mb-2 font-mono text-xs uppercase tracking-widest text-paper-faint">
-            Session · {new Date(report.generated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          </p>
-          <h1 className="font-display text-4xl font-semibold text-paper md:text-5xl">Interview Feedback</h1>
-        </motion.div>
+    <div className="min-h-screen bg-ink-950">
+      {/* Header bar */}
+      <div className="sticky top-0 z-10 border-b border-ink-700/60 bg-ink-900/90 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-3">
+          <div className="flex items-center gap-2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="M4 18 L12 4 L20 18 L15 18 L12 12 L9 18 Z" fill="#e2e8f4" />
+              <circle cx="19.5" cy="4.5" r="2.2" fill="#22c55e" />
+            </svg>
+            <span className="font-display text-sm font-bold text-paper" style={{ letterSpacing: '-0.02em' }}>Intervue</span>
+          </div>
+          <span className="font-mono text-xs text-paper-faint ml-2">SESSION RECAP · {sessionDate.toUpperCase()}</span>
+          <div className="flex-1" />
+          <button
+            onClick={handleShare}
+            disabled={sharing || !!shareUrl}
+            className="font-mono text-xs text-paper-faint border border-ink-700/60 px-3 py-1.5 rounded-sm hover:border-paper-faint/30 hover:text-paper-dim transition-all disabled:opacity-50"
+          >
+            {sharing ? 'Generating...' : shareUrl ? '✓ Copied' : '↗ Share replay'}
+          </button>
+          <button onClick={() => navigate('/setup')} className="flex items-center gap-2 rounded-full bg-paper px-4 py-1.5 font-mono text-xs text-ink-950 hover:bg-paper/80 transition-all ml-2">
+            Run a follow-up <span>→</span>
+          </button>
+        </div>
+      </div>
 
-        <motion.div variants={fadeUp} className="mb-8 rounded-md border border-ink-700/60 bg-ink-900 p-8">
-          <div className="flex flex-col items-start gap-8 sm:flex-row sm:items-center">
-            <div>
-              <p className="mb-1 font-mono text-xs uppercase tracking-widest text-paper-faint">Overall score</p>
-              <p className={cn('font-display text-7xl font-semibold leading-none', scoreColor)}>{overallScore}</p>
-              <p className="mt-1 font-mono text-xs text-paper-faint">/ 100</p>
+      <motion.div variants={stagger} initial="hidden" animate="show" className="mx-auto max-w-5xl px-6 py-10">
+
+        {/* Editorial headline + score card */}
+        <motion.div variants={fadeUp} className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
+          <div className="flex flex-col justify-center">
+            <p className="mb-3 font-mono text-xs uppercase tracking-widest text-ember">YOUR RESULT</p>
+            <h1 className="font-display text-4xl font-semibold leading-[1.05] text-paper md:text-5xl" style={{ letterSpacing: '-0.03em' }}>
+              Interview<br />Feedback
+            </h1>
+            <p className="mt-4 text-sm leading-relaxed text-paper-dim max-w-md">
+              {session?.company && <><span className="font-medium text-paper">{session.company}</span> · </>}
+              {session?.role && <><span className="capitalize">{session.role}</span> · </>}
+              {session?.mode && <span className="capitalize">{session.mode}</span>} interview session
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-ink-700/60 bg-ink-900 p-6 shadow-card">
+            <div className="mb-5 flex items-baseline gap-3">
+              <p className={cn('font-display font-semibold leading-none', scoreColor)} style={{ fontSize: 72, letterSpacing: '-0.04em' }}>{overallScore}</p>
+              <div>
+                <p className="font-mono text-sm text-paper-faint">/ 100</p>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-paper-faint mt-1">overall</p>
+              </div>
             </div>
-            <div className="h-px w-full bg-ink-700/60 sm:h-20 sm:w-px" />
-            <div className="flex flex-wrap gap-8">
-              {metrics.map((m) => <MetricRing key={m.label} {...m} />)}
+            <div className="space-y-3">
+              {metrics.map((m) => (
+                <div key={m.label}>
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="font-mono text-[11px] uppercase tracking-widest text-paper-dim">{m.label}</span>
+                    <span className="font-display text-sm font-semibold text-paper">{m.score}</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-ink-700/40">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ background: m.score >= 75 ? '#4ade80' : m.score >= 55 ? '#f59e0b' : '#f87171' }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${m.score}%` }}
+                      transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </motion.div>
 
-        <motion.div variants={fadeUp} className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-md border border-moss/20 bg-moss/5 p-5">
-            <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-moss">Top strengths</p>
-            <ul className="space-y-2">
-              {report.top_strengths.map((s, i) => <li key={i} className="flex gap-2 text-sm text-paper-dim"><span className="text-moss shrink-0">✓</span>{s}</li>)}
-            </ul>
+        {/* Strengths + Improvements */}
+        <motion.div variants={fadeUp} className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border border-moss/20 bg-moss/[0.04] p-5">
+            <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-moss">↑ Top Strengths</p>
+            <div className="space-y-3">
+              {report.top_strengths.map((s, i) => (
+                <div key={i} className="border-b border-ink-700/40 pb-3 last:border-0 last:pb-0">
+                  <p className="text-sm text-paper-dim leading-relaxed flex gap-2"><span className="text-moss shrink-0 mt-0.5">✓</span>{s}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="rounded-md border border-crimson/20 bg-crimson/5 p-5">
-            <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-crimson">Areas to improve</p>
-            <ul className="space-y-2">
-              {report.top_weaknesses.map((w, i) => <li key={i} className="flex gap-2 text-sm text-paper-dim"><span className="text-crimson shrink-0">△</span>{w}</li>)}
-            </ul>
+          <div className="rounded-2xl border border-crimson/20 bg-crimson/[0.04] p-5">
+            <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-crimson">↓ Fix First</p>
+            <div className="space-y-3">
+              {report.top_weaknesses.map((w, i) => (
+                <div key={i} className="border-b border-ink-700/40 pb-3 last:border-0 last:pb-0">
+                  <p className="text-sm text-paper-dim leading-relaxed flex gap-2"><span className="text-crimson shrink-0 mt-0.5">△</span>{w}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </motion.div>
 
         {perQuestion.length > 0 && (
-          <motion.div variants={fadeUp} className="mb-8">
-            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-paper-faint">Question breakdown</p>
+          <motion.div variants={fadeUp} className="mb-6">
+            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-paper-faint">Question Breakdown</p>
             <div className="space-y-3">
               {perQuestion.map((qf, i) => <QuestionAccordion key={qf.questionId} qf={qf} idx={i} />)}
             </div>
@@ -369,11 +405,11 @@ export function Feedback() {
         )}
 
         {drills.length > 0 && (
-          <motion.div variants={fadeUp} className="mb-10">
-            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-paper-faint">AREAS TO IMPROVE</p>
+          <motion.div variants={fadeUp} className="mb-8">
+            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-paper-faint">Practice Drills</p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {drills.map((d, i) => (
-                <div key={i} className="rounded-md border border-ink-700/60 bg-ink-900 p-5">
+                <div key={i} className="rounded-xl border border-ink-700/60 bg-ink-900 p-5 shadow-card">
                   <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-ember">{d.type}</p>
                   <p className="mb-2 font-display text-sm font-semibold text-paper">{d.title}</p>
                   <p className="text-xs leading-relaxed text-paper-dim">{d.description}</p>
@@ -385,7 +421,6 @@ export function Feedback() {
 
         {snapshots.length > 0 && (
           <motion.div variants={fadeUp} className="mb-8">
-            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-paper-faint">Code Evolution</p>
             {loadingSnapshots ? (
               <p className="font-mono text-xs text-paper-faint/60 animate-pulse">Loading snapshots...</p>
             ) : (
@@ -394,7 +429,8 @@ export function Feedback() {
           </motion.div>
         )}
 
-        <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-4">
+        {/* Bottom actions */}
+        <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3 border-t border-ink-700/40 pt-8">
           {session?.audio_s3_url ? (
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[10px] uppercase tracking-widest text-paper-faint">Session Audio</span>
@@ -405,17 +441,10 @@ export function Feedback() {
               onClick={() => toast.info('Audio replay not available for this session')}
               className="flex items-center gap-2 rounded-sm border border-ink-700/60 px-4 py-2 font-mono text-xs text-paper-faint hover:border-paper-faint/30 hover:text-paper-dim transition-all duration-200"
             >
-              ▶ Replay session audio
+              ▶ Replay audio
             </button>
           )}
-          <button
-            onClick={handleShare}
-            disabled={sharing || !!shareUrl}
-            className="flex items-center gap-2 rounded-sm border border-ink-700/60 px-4 py-2 font-mono text-xs text-paper-faint hover:border-paper-faint/30 hover:text-paper-dim transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {sharing ? 'Generating...' : shareUrl ? '✓ Link copied' : '↗ Share Report'}
-          </button>
-          <button onClick={() => navigate('/setup')} className="flex items-center gap-2 rounded-sm bg-ember px-5 py-2 font-mono text-xs text-ink-950 hover:bg-ember-soft transition-all duration-200">
+          <button onClick={() => navigate('/setup')} className="flex items-center gap-2 rounded-full bg-paper px-5 py-2 font-mono text-xs text-ink-950 hover:bg-paper/80 transition-all">
             Practice again →
           </button>
           <button onClick={() => navigate('/history')} className="font-mono text-xs text-paper-faint hover:text-paper-dim transition-colors border-b border-transparent hover:border-paper-faint/30 pb-px">

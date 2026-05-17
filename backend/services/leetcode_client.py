@@ -1,28 +1,26 @@
+import json
 import logging
-import time
 
 import httpx
 
+from redis_client import get_redis
 from services.html_utils import strip_html
 
 logger = logging.getLogger(__name__)
 
 _BASE = "https://alfa-leetcode-api.onrender.com"
-_LIST_CACHE_TTL = 3600    # 1 hour
-_DETAIL_CACHE_TTL = 21600  # 6 hours
-
-_list_cache: list[dict] | None = None
-_list_cache_at: float = 0.0
-_detail_cache: dict[str, dict] = {}
-_detail_cache_at: dict[str, float] = {}
+_LIST_CACHE_TTL = 3600
+_DETAIL_CACHE_TTL = 21600
 
 
 async def fetch_problem_list(limit: int = 200) -> list[dict]:
-    """Return raw problem list items from alfa-leetcode-api, with in-memory caching."""
-    global _list_cache, _list_cache_at
-    now = time.time()
-    if _list_cache is not None and now - _list_cache_at < _LIST_CACHE_TTL:
-        return _list_cache
+    cache_key = f"problems:catalog:{limit}"
+    try:
+        cached = await get_redis().get(cache_key)
+        if cached:
+            return json.loads(cached)
+    except Exception as exc:
+        logger.warning("Redis unavailable for problem list cache: %s", exc)
 
     try:
         async with httpx.AsyncClient(timeout=60) as client:
@@ -30,23 +28,24 @@ async def fetch_problem_list(limit: int = 200) -> list[dict]:
             resp.raise_for_status()
             data = resp.json()
         result = data.get("problemsetQuestionList", [])
-        _list_cache = result
-        _list_cache_at = now
+        try:
+            await get_redis().setex(cache_key, _LIST_CACHE_TTL, json.dumps(result))
+        except Exception as exc:
+            logger.warning("Failed to write problem list to Redis: %s", exc)
         return result
     except Exception as exc:
         logger.error("Failed to fetch LeetCode problem list: %s", exc)
-        return _list_cache or []
+        return []
 
 
 async def fetch_problem_detail(slug: str) -> dict | None:
-    """Return enriched problem detail for a titleSlug, with in-memory caching.
-
-    Returns None on error. Returned dict keys: title, titleSlug, difficulty,
-    description, topic_tags, hints.
-    """
-    now = time.time()
-    if slug in _detail_cache and now - _detail_cache_at.get(slug, 0.0) < _DETAIL_CACHE_TTL:
-        return _detail_cache[slug]
+    key = f"problems:detail:{slug}"
+    try:
+        cached = await get_redis().get(key)
+        if cached:
+            return json.loads(cached)
+    except Exception as exc:
+        logger.warning("Redis unavailable for problem detail cache: %s", exc)
 
     try:
         async with httpx.AsyncClient(timeout=60) as client:
@@ -65,8 +64,10 @@ async def fetch_problem_detail(slug: str) -> dict | None:
             "example_testcases": data.get("exampleTestcases", ""),
             "question_html": raw_html,
         }
-        _detail_cache[slug] = result
-        _detail_cache_at[slug] = now
+        try:
+            await get_redis().setex(key, _DETAIL_CACHE_TTL, json.dumps(result))
+        except Exception as exc:
+            logger.warning("Failed to write problem detail to Redis: %s", exc)
         return result
     except Exception as exc:
         logger.error("Failed to fetch LeetCode detail for %s: %s", slug, exc)

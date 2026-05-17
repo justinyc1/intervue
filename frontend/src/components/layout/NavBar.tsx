@@ -1,6 +1,16 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { SignedIn, SignedOut, UserButton, SignInButton } from '@clerk/clerk-react'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/cn'
+
+function Logo() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M4 18 L12 4 L20 18 L15 18 L12 12 L9 18 Z" fill="#e2e8f4" />
+      <circle cx="19.5" cy="4.5" r="2.2" fill="#22c55e" />
+    </svg>
+  )
+}
 
 function AccountIcon() {
   return (
@@ -11,6 +21,12 @@ function AccountIcon() {
   )
 }
 
+const NAV_LINKS = [
+  { to: '/history',  label: 'Sessions' },
+  { to: '/problems', label: 'Problems' },
+  { to: '/setup',    label: 'Practice'  },
+]
+
 export function NavBar() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -19,72 +35,89 @@ export function NavBar() {
   if (isInterviewRoom) return null
 
   return (
-    <header className="sticky top-0 z-50 border-b border-ink-700/60 bg-ink-950/90 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link to="/" className="flex items-center gap-2 group">
-          <span className="font-mono text-xs text-ember">◆</span>
-          <span className="font-sans text-xl font-bold tracking-tight text-paper group-hover:text-ember transition-colors duration-200">
+    <motion.header
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className="sticky top-0 z-50 border-b border-white/[0.06] bg-ink-950/80 backdrop-blur-xl"
+    >
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-[16px]">
+
+        {/* Wordmark */}
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <Logo />
+          <span
+            className="text-[17px] font-bold tracking-[-0.02em] text-paper transition-opacity duration-200 group-hover:opacity-70"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             Intervue
           </span>
         </Link>
 
-        <div className="hidden items-center gap-8 md:flex">
-          {[
-            { to: '/history', label: 'Sessions' },
-            { to: '/problems', label: 'Problems' },
-            { to: '/setup', label: 'Practice' },
-          ].map(({ to, label }) => (
+        {/* Nav links */}
+        <div className="hidden items-center gap-7 md:flex">
+          {NAV_LINKS.map(({ to, label }) => (
             <Link
               key={to}
               to={to}
               className={cn(
-                'font-mono text-xs uppercase tracking-widest transition-colors duration-200',
+                'relative text-sm transition-colors duration-200',
                 location.pathname === to
-                  ? 'text-paper'
-                  : 'text-paper-dim hover:text-paper'
+                  ? 'font-semibold text-paper'
+                  : 'text-paper-faint hover:text-paper-dim'
               )}
             >
               {label}
+              {location.pathname === to && (
+                <motion.span
+                  layoutId="nav-underline"
+                  className="absolute -bottom-[18px] left-0 right-0 h-[1px] bg-ember"
+                />
+              )}
             </Link>
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Actions */}
+        <div className="flex items-center gap-2.5">
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="group relative overflow-hidden rounded-sm border border-ember/30 bg-ember/8 px-4 py-2 font-mono text-xs uppercase tracking-widest text-ember transition-all duration-200 hover:border-ember/60 hover:bg-ember/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ember">
+              <button className="btn-ghost-pill text-sm font-medium">
                 Sign in
-                <span className="ml-2 opacity-60 group-hover:opacity-100 transition-opacity">→</span>
               </button>
             </SignInButton>
+            <button
+              onClick={() => navigate('/setup')}
+              className="btn-primary text-sm"
+            >
+              <span className="btn-dot" />
+              Start a mock
+              <span className="btn-arrow">→</span>
+            </button>
           </SignedOut>
+
           <SignedIn>
             <button
               onClick={() => navigate('/setup')}
-              className="group relative overflow-hidden rounded-sm border border-ember/30 bg-ember/8 px-4 py-2 font-mono text-xs uppercase tracking-widest text-ember transition-all duration-200 hover:border-ember/60 hover:bg-ember/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ember"
+              className="btn-primary text-sm"
             >
-              Begin session
-              <span className="ml-2 opacity-60 group-hover:opacity-100 transition-opacity">→</span>
+              <span className="btn-dot" />
+              New session
+              <span className="btn-arrow">→</span>
             </button>
             <UserButton
               appearance={{
                 variables: {
-                  colorText: '#FAF7F2',
-                  colorTextSecondary: '#A8A29E',
-                  colorBackground: '#0F0F12',
-                  colorInputBackground: '#1A1A1F',
+                  colorText: '#e2e8f4',
+                  colorTextSecondary: '#8892a4',
+                  colorBackground: '#13151c',
+                  colorInputBackground: '#191d28',
+                  colorPrimary: '#22c55e',
                 },
                 elements: {
                   avatarBox: 'w-8 h-8',
-                  userButtonPopoverCard: 'bg-ink-900 border border-ink-700/60 shadow-card !text-paper',
-                  userButtonPopoverActionButton: '!text-paper hover:!bg-ink-800',
-                  userButtonPopoverActionButtonText: '!text-paper',
-                  userButtonPopoverActionButtonIcon: '!text-paper-faint',
-                  userButtonPopoverCustomItemButton: '!text-paper hover:!bg-ink-800',
-                  userButtonPopoverCustomItemButtonText: '!text-paper',
-                  userButtonPopoverCustomItemButtonIconBox: '!text-paper-faint',
-                  userPreviewMainIdentifier: '!text-paper !font-medium',
-                  userPreviewSecondaryIdentifier: '!text-paper-faint',
+                  userButtonPopoverCard: 'shadow-[var(--shadow-elev)] border border-white/[0.08] bg-[#13151c]',
+                  userButtonPopoverActionButton: 'hover:bg-[#191d28] text-[#e2e8f4]',
                   userButtonPopoverFooter: '!hidden',
                   badge: '!hidden',
                 },
@@ -101,6 +134,6 @@ export function NavBar() {
           </SignedIn>
         </div>
       </nav>
-    </header>
+    </motion.header>
   )
 }

@@ -16,14 +16,6 @@ def override_require_auth():
     return FAKE_USER_ID
 
 
-@pytest.fixture
-def client():
-    app.dependency_overrides[require_auth] = override_require_auth
-    with TestClient(app) as c:
-        yield c
-    app.dependency_overrides.clear()
-
-
 def _fake_session():
     return {
         "_id": ObjectId(FAKE_SESSION_ID),
