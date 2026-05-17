@@ -1,246 +1,550 @@
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BrowserScrollReveal } from '../components/BrowserScrollReveal'
-import { LiquidGlass } from '../components/LiquidGlass'
 
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
-}
+// ── Design tokens ────────────────────────────────────────
+const GREEN = '#22c55e'
+
+// ── Framer Motion variants ───────────────────────────────
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } }
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } as const},
+  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: 'easeOut' as const } },
 }
 
-const sampleTranscript = [
-  { speaker: 'I', text: "Walk me through your approach before you start coding.", highlight: false },
-  { speaker: 'U', text: "So my first instinct is brute force — O(n²) — but we can do better. I'd use a hash map to store complements as I iterate.", highlight: true },
-  { speaker: 'I', text: "What's the space complexity of that?", highlight: false },
-  { speaker: 'U', text: "O(n) in the worst case. Each element gets one entry in the map.", highlight: true },
-  { speaker: 'I', text: "Good. I'll stop you there — one more thing: what about duplicate values?", highlight: false },
+// ── Animated typing code editor ─────────────────────────
+type TokenColor = 'kw' | 'fn' | 'pa' | 'op' | 'cm' | 'sp'
+type Token = [TokenColor, string]
+type Line = Token[]
+
+const COLORS: Record<TokenColor, string> = {
+  kw: '#c792ea',  // purple
+  fn: '#82aaff',  // blue
+  pa: '#e2e8f4',  // light text
+  op: '#4a5568',  // dimmed
+  cm: '#22c55e',  // green (comments = primary accent)
+  sp: '#e2e8f4',
+}
+
+const CODE_LINES: Line[] = [
+  [['kw','def '],['fn','twoSum'],['op','('],['pa','nums'],['op',', '],['pa','target'],['op','):']],
+  [['sp','    '],['cm','# one pass, hash by complement']],
+  [['sp','    '],['pa','seen'],['op',' = {}']],
+  [['sp','    '],['kw','for '],['pa','i'],['op',', '],['pa','n'],['kw',' in '],['fn','enumerate'],['op','('],['pa','nums'],['op','):']],
+  [['sp','        '],['kw','if '],['op','('],['pa','target'],['op',' - '],['pa','n'],['op',') '],['kw','in '],['pa','seen'],['op',':']],
+  [['sp','            '],['kw','return '],['op','['],['pa','seen'],['op','['],['pa','target'],['op',' - '],['pa','n'],['op','], '],['pa','i'],['op',']']],
+  [['sp','        '],['pa','seen'],['op','['],['pa','n'],['op','] = '],['pa','i']],
 ]
 
-const features = [
-  {
-    num: '01',
-    title: 'Any interview, any role',
-    body: 'Technical coding rounds with a live editor and test runner, or behavioral STAR sessions with adaptive follow-ups. Switch personas, difficulty, and duration to match any loop.',
-  },
-  {
-    num: '02',
-    title: 'A real interviewer, not a quiz',
-    body: 'The AI speaks, listens, interrupts, and pushes back — just like a human would. It reads your code silently, probes weak answers, and holds the pressure until you crack or nail it.',
-  },
-  {
-    num: '03',
-    title: 'Evidence-based feedback',
-    body: 'Every score is tied to a specific moment in your transcript. You see exactly where you lost points — and what a stronger answer would have looked like.',
-  },
-]
+function TypingCode({ active }: { active: boolean }) {
+  const flat = CODE_LINES.map(toks => toks.map(t => t[1]).join(''))
+  const total = flat.reduce((a, b) => a + b.length, 0)
+  const [tick, setTick] = useState(0)
 
-const companies = ['Google', 'Meta', 'Amazon', 'Apple', 'Microsoft', 'Stripe', 'Netflix', 'Airbnb']
+  useEffect(() => {
+    if (!active) return
+    const id = setInterval(() => setTick(t => (t >= total + 40 ? 0 : t + 1)), 28)
+    return () => {
+      clearInterval(id)
+      setTick(0)
+    }
+  }, [active, total])
 
-export function Home() {
-  const navigate = useNavigate()
+  const lineOffsets = CODE_LINES.reduce<{ offs: number[]; cur: number }>(
+    ({ offs, cur }, toks) => {
+      const len = toks.map(t => t[1]).join('').length + 1
+      return { offs: [...offs, cur], cur: cur + len }
+    },
+    { offs: [], cur: 0 }
+  ).offs
 
   return (
-    <div className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-ember/4 blur-[140px]" />
+    <div style={{
+      background: '#13151c',
+      border: '1px solid rgba(255,255,255,0.07)',
+      borderRadius: 14,
+      padding: '14px 16px 18px',
+      fontFamily: 'var(--font-mono)',
+      fontSize: 12.5,
+      lineHeight: 1.75,
+      boxShadow: '0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -8px rgba(0,0,0,0.7)',
+    }}>
+      {/* Chrome bar */}
+      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10, paddingBottom:10, borderBottom:'1px dashed rgba(255,255,255,0.06)' }}>
+        <span style={{ width:9, height:9, borderRadius:99, background:'#FF5F57' }} />
+        <span style={{ width:9, height:9, borderRadius:99, background:'#FEBC2E' }} />
+        <span style={{ width:9, height:9, borderRadius:99, background:'#28C840' }} />
+        <span style={{ marginLeft:8, fontFamily:'var(--font-mono)', fontSize:11, color:'#4a5568' }}>solution.py</span>
+        <span style={{ marginLeft:'auto', fontFamily:'var(--font-mono)', fontSize:10, color:'#4a5568' }}>● running</span>
       </div>
-      <section className="relative mx-auto max-w-7xl px-6 pt-20 pb-24 md:pt-32 md:pb-36">
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-24"
-        >
-          <div className="flex flex-col justify-center">
-            <motion.p variants={fadeUp} className="mb-6 font-mono text-xs uppercase tracking-widest text-paper-faint">
-              <span className="text-ember">▶</span> session.ready
-            </motion.p>
-
-            <motion.h1
-              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.09 } } }}
-              className="flex flex-col"
-            >
-              <motion.div variants={fadeUp} className="group flex items-center gap-3 cursor-default">
-                <span className="font-sans text-[clamp(2.8rem,6vw,5rem)] font-extrabold leading-[0.96] tracking-tight">
-                  <span className="text-amber-400 transition-all duration-200 group-hover:line-through group-hover:opacity-50">Solve</span>
-                  <span className="text-paper transition-all duration-200 group-hover:line-through group-hover:opacity-50"> it.</span>
-                </span>
-                <span className="font-mono text-[10px] text-amber-400/70 border border-amber-400/30 bg-amber-400/10 rounded-sm px-1.5 py-0.5 shrink-0 self-center">
-                  Technical
-                </span>
-              </motion.div>
-
-              <motion.div variants={fadeUp} className="group flex items-center gap-3 cursor-default">
-                <span className="font-sans text-[clamp(2.8rem,6vw,5rem)] font-extrabold leading-[0.96] tracking-tight">
-                  <span className="text-sky-400 transition-all duration-200 group-hover:line-through group-hover:opacity-50">Explain</span>
-                  <span className="text-paper transition-all duration-200 group-hover:line-through group-hover:opacity-50"> it.</span>
-                </span>
-                <span className="font-mono text-[10px] text-sky-400/70 border border-sky-400/30 bg-sky-400/10 rounded-sm px-1.5 py-0.5 shrink-0 self-center">
-                  Behavioral
-                </span>
-              </motion.div>
-
-              <motion.div variants={fadeUp} className="flex items-center gap-3">
-                <span className="font-sans text-[clamp(2.8rem,6vw,5rem)] font-extrabold leading-[0.96] tracking-tight">
-                  <span className="text-moss">Get the </span>
-                  <span className="text-violet-400">offer.</span>
-                </span>
-              </motion.div>
-            </motion.h1>
-
-            <motion.p variants={fadeUp} className="mt-8 max-w-md text-base leading-relaxed text-paper-dim">
-            Realistic technical coding rounds, behavioral STAR sessions, or both with a live AI Interviewer. Practice coding and behavioral interviews. Adaptive follow-up questions, real pressure, clear evidence-based feedback.
-            </motion.p>
-
-            <motion.div variants={fadeUp} className="mt-10 flex flex-wrap items-center gap-4">
-              <button
-                onClick={() => navigate('/setup')}
-                className="group flex items-center gap-3 rounded-sm bg-ember px-6 py-3 font-mono text-sm font-medium uppercase tracking-widest text-ink-950 transition-all duration-200 hover:bg-ember-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-ember focus-visible:outline-offset-2 active:scale-[0.97]"
-              >
-                Begin a session
-                <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-              </button>
-              <button
-                onClick={() => navigate('/sample-feedback')}
-                className="font-mono text-sm uppercase tracking-widest text-paper-dim transition-colors duration-200 hover:text-paper border-b border-transparent hover:border-paper-faint pb-px"
-              >
-                See sample feedback
-              </button>
-            </motion.div>
-
-            <motion.div variants={fadeUp} className="mt-12 flex items-center gap-6">
-              {['Voice AI', 'Technical & Behavioral', 'Company-tailored'].map((tag) => (
-                <div key={tag} className="flex items-center gap-2">
-                  <span className="h-1 w-1 rounded-full bg-ember" />
-                  <span className="font-mono text-xs text-paper-faint">{tag}</span>
-                </div>
-              ))}
-            </motion.div>
+      {CODE_LINES.map((toks, li) => {
+        const lineText = toks.map(t => t[1]).join('')
+        const start = lineOffsets[li]
+        const localTick = Math.max(0, Math.min(lineText.length, tick - start))
+        let printed = 0
+        return (
+          <div key={li} style={{ display:'flex', gap:14, minHeight:'1.75em' }}>
+            <span style={{ color:'#4a5568', width:14, textAlign:'right' }}>{li + 1}</span>
+            <span style={{ whiteSpace:'pre' }}>
+              {toks.map(([color, seg], ti) => {
+                const remaining = Math.max(0, localTick - printed)
+                const visible = seg.slice(0, Math.min(seg.length, remaining))
+                printed += seg.length
+                return <span key={ti} style={{ color: COLORS[color] }}>{visible}</span>
+              })}
+              {tick >= start && tick < start + lineText.length + 1 && (
+                <span style={{ display:'inline-block', width:7, height:14, background: GREEN, verticalAlign:'-2px', marginLeft:1, animation:'blink 1s steps(2) infinite' }} />
+              )}
+            </span>
           </div>
+        )
+      })}
+    </div>
+  )
+}
 
-          <motion.div variants={fadeUp} className="flex items-center justify-center">
-            <div className="w-full max-w-md rounded-md border border-ink-700/80 bg-ink-900 p-6 shadow-card">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 animate-pulse-ember rounded-full bg-ember" />
-                  <span className="font-mono text-xs text-ember">Live session</span>
-                </div>
-                <span className="font-mono text-xs text-paper-faint">00:12:43</span>
-              </div>
+// ── Animated transcript ──────────────────────────────────
+const TRANSCRIPT_LINES = [
+  { who: 'int' as const, t: 'Walk me through your approach before you write anything.' },
+  { who: 'you' as const, t: 'I\'m planning on using a hash map to store complements as I iterate — O(n) time, O(n) space.' },
+  { who: 'int' as const, t: 'What if the array has duplicates?' },
+  { who: 'you' as const, t: "I don't think it would matter, the first match wins. The map only needs the earlier index." },
+  { who: 'int' as const, t: 'Nice. Code it up.' },
+]
 
-              <div className="mb-4 rounded-sm border border-ink-700/50 bg-ink-800 px-3 py-2">
-                <p className="font-mono text-xs text-paper-faint">Two Sum — Easy</p>
-              </div>
+function Transcript({ active }: { active: boolean }) {
+  const [shown, setShown] = useState(0)
+  useEffect(() => {
+    if (!active) return
+    let i = 0
+    const id = setInterval(() => {
+      setShown(i)
+      i = i >= TRANSCRIPT_LINES.length + 3 ? 0 : i + 1
+    }, 1100)
+    return () => clearInterval(id)
+  }, [active])
 
-              <div className="space-y-3">
-                {sampleTranscript.map((line, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.8 + i * 0.18, duration: 0.35 }}
-                    className="flex gap-3"
-                  >
-                    <span className={`mt-0.5 shrink-0 font-mono text-[10px] font-medium ${line.speaker === 'I' ? 'text-paper-faint' : 'text-ember'}`}>
-                      {line.speaker === 'I' ? 'INT' : 'YOU'}
-                    </span>
-                    <p className={`text-sm leading-relaxed ${line.highlight ? 'text-paper' : 'text-paper-dim'}`}>
-                      {line.highlight && (
-                        <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-ember align-middle" />
-                      )}
-                      {line.text}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
+  return (
+    <div style={{
+      background: '#13151c',
+      border: '1px solid rgba(255,255,255,0.07)',
+      borderRadius: 14,
+      padding: 16,
+      boxShadow: '0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -8px rgba(0,0,0,0.7)',
+      display: 'flex', flexDirection: 'column', gap: 10,
+      minHeight: 220,
+    }}>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
+        <span className="live-dot" />
+        <span style={{ fontFamily:'var(--font-mono)', fontSize:11, color:'#e2e8f4', letterSpacing:'.06em' }}>LIVE TRANSCRIPT</span>
+        <span style={{ marginLeft:'auto', fontFamily:'var(--font-mono)', fontSize:11, color:'#4a5568' }}>00:04:21</span>
+      </div>
+      {TRANSCRIPT_LINES.slice(0, shown).map((l, i) => (
+        <div key={i} style={{ display:'flex', gap:10, alignItems:'flex-start', animation:'msg-in .36s cubic-bezier(.2,.8,.2,1) both' }}>
+          <span style={{
+            fontFamily:'var(--font-mono)', fontSize:10, fontWeight:600,
+            padding:'3px 7px', borderRadius:6, marginTop:2,
+            background:    l.who === 'int' ? 'rgba(255,255,255,0.08)'       : 'rgba(34,197,94,0.10)',
+            color:         l.who === 'int' ? '#8892a4'                      : '#22c55e',
+            border: `1px solid ${l.who === 'int' ? 'rgba(255,255,255,0.08)' : 'rgba(34,197,94,0.20)'}`,
+            minWidth: 36, textAlign:'center',
+          }}>
+            {l.who === 'int' ? 'AI' : 'YOU'}
+          </span>
+          <p style={{ fontSize:13.5, lineHeight:1.55, color:'#e2e8f4' }}>{l.t}</p>
+        </div>
+      ))}
+      <style>{`@keyframes msg-in { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }`}</style>
+    </div>
+  )
+}
 
-              <div className="mt-5 border-t border-ink-700/50 pt-4">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-paper-faint">
-                  Clarity <span className="text-ember">82</span> · Confidence <span className="text-ember">71</span> · Technical <span className="text-ember">79</span>
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      </section>
+// ── Animated score dial ──────────────────────────────────
+function Dial({ value, label, color, delay = 0 }: { value: number; label: string; color: string; delay?: number }) {
+  const [v, setV] = useState(0)
+  useEffect(() => {
+    const id = setTimeout(() => setV(value), delay)
+    return () => clearTimeout(id)
+  }, [value, delay])
 
-      <BrowserScrollReveal />
+  const r = 38, c = 2 * Math.PI * r
+  const off = c * (1 - v / 100)
 
-      <section className="relative border-t border-ink-700/40 bg-ink-900/40 py-20">
-        <div className="mx-auto max-w-7xl px-6">
+  return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+      <div style={{ position:'relative', width:96, height:96 }}>
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r={r} stroke="rgba(255,255,255,0.08)" strokeWidth="6" fill="none" />
+          <circle
+            cx="48" cy="48" r={r} stroke={color} strokeWidth="6" fill="none"
+            strokeLinecap="round"
+            strokeDasharray={c}
+            strokeDashoffset={off}
+            style={{ transition:'stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)', transform:'rotate(-90deg)', transformOrigin:'48px 48px' }}
+          />
+        </svg>
+        <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column' }}>
+          <span style={{ fontSize:28, fontWeight:600, letterSpacing:'-0.02em', fontFamily:'var(--font-display)', color:'#e2e8f4' }}>
+            {Math.round(v)}
+          </span>
+          <span style={{ fontFamily:'var(--font-mono)', fontSize:9, color:'#4a5568' }}>/100</span>
+        </div>
+      </div>
+      <span style={{ fontFamily:'var(--font-mono)', fontSize:11, letterSpacing:'.06em', color:'#8892a4', textTransform:'uppercase' }}>
+        {label}
+      </span>
+    </div>
+  )
+}
+
+// ── Feature index row ────────────────────────────────────
+const FEATURES = [
+  {
+    k: 'A',
+    title: 'Adaptive interruptions',
+    body: 'Goes silent? It nudges. Rambling? It cuts in. Hand-wavy? It pushes back with the exact follow-up a senior would ask.',
+  },
+  {
+    k: 'B',
+    title: 'Real coding environment',
+    body: 'Monaco editor, multi-language, real test runner. The interviewer reads tokens as you type and reacts in voice.',
+  },
+  {
+    k: 'C',
+    title: 'Company-tailored loops',
+    body: 'Scrapes pattern signals, not exact questions. Meta-flavored vs Stripe-flavored vs early-stage flavored.',
+  },
+  {
+    k: 'D',
+    title: 'Evidence-tied feedback',
+    body: 'Every score links back to the exact transcript moment. No hallucinated coaching.',
+  },
+]
+
+function FeatureRow({ k, title, body }: { k: string; title: string; body: string }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '56px 1fr 1.6fr 24px',
+        alignItems: 'center',
+        gap: 24,
+        padding: hovered ? '28px 14px' : '28px 0',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        background: hovered ? 'rgba(34,197,94,0.04)' : 'transparent',
+        cursor: 'pointer',
+        transition: 'background 0.2s, padding 0.2s',
+      }}
+    >
+      <span style={{ fontSize:42, fontWeight:600, color: GREEN, letterSpacing:'-0.02em', fontFamily:'var(--font-display)' }}>{k}</span>
+      <h3 style={{ fontSize:26, fontWeight:600, letterSpacing:'-0.02em', fontFamily:'var(--font-display)', color:'#e2e8f4' }}>{title}</h3>
+      <p style={{ color:'#8892a4', fontSize:15, lineHeight:1.55 }}>{body}</p>
+      <span style={{ fontFamily:'var(--font-mono)', fontSize:18, color:'#e2e8f4' }}>↗</span>
+    </div>
+  )
+}
+
+// ── Companies marquee ────────────────────────────────────
+const COMPANIES = ['Google', 'Meta', 'Amazon', 'Apple', 'Microsoft', 'Stripe', 'Netflix', 'Airbnb', 'OpenAI', 'Anthropic', 'Databricks', 'Figma']
+
+// ── Social proof avatars ─────────────────────────────────
+const AVATAR_COLORS = ['rgba(34,197,94,0.3)', 'rgba(130,170,255,0.3)', 'rgba(248,113,113,0.3)', 'rgba(251,191,36,0.3)']
+
+// ── Main component ───────────────────────────────────────
+export function Home() {
+  const navigate = useNavigate()
+  const [active] = useState(true)
+  const scoreRef = useRef<HTMLDivElement>(null)
+  const [scoresVisible, setScoresVisible] = useState(false)
+
+  useEffect(() => {
+    const el = scoreRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setScoresVisible(true) },
+      { threshold: 0.3 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div style={{ background:'#0c0e14', minHeight:'100vh' }}>
+
+      {/* ── Radial hero background gradient ── */}
+      <div aria-hidden style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'radial-gradient(ellipse at 60% 0%, rgba(34,197,94,0.06) 0%, transparent 60%)',
+        pointerEvents: 'none', zIndex: 0,
+      }} />
+
+      {/* ── Background blob ── */}
+      <div
+        aria-hidden
+        style={{
+          position:'fixed', top:-180, right:-120, width:560, height:560,
+          background:'radial-gradient(closest-side, rgba(34,197,94,0.08), transparent 70%)',
+          pointerEvents:'none', zIndex:0,
+        }}
+      />
+
+      {/* ════════════════════════════════════════
+          HERO
+      ════════════════════════════════════════ */}
+      <section style={{ position:'relative', zIndex:1, padding:'56px 36px 40px' }}>
+        <div style={{ maxWidth:1280, margin:'0 auto' }}>
           <motion.div
             variants={stagger}
             initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-80px' }}
-            className="grid grid-cols-1 gap-6 md:grid-cols-3 md:items-stretch"
+            animate="show"
+            style={{ display:'grid', gridTemplateColumns:'1.1fr 1fr', gap:48, alignItems:'center' }}
+            className="grid-cols-1 lg:grid-cols-[1.1fr_1fr]"
           >
-            {features.map(({ num, title, body }) => (
-              <motion.div key={num} variants={fadeUp} className="flex">
-                <LiquidGlass className="p-8 flex-1">
-                  <p className="mb-4 font-mono text-xs tracking-widest text-ember">{num}</p>
-                  <h3 className="mb-3 font-sans text-xl font-bold text-paper">{title}</h3>
-                  <p className="text-sm leading-relaxed text-paper-dim">{body}</p>
-                </LiquidGlass>
+            {/* Left: copy */}
+            <div className="flex flex-col">
+              <motion.div variants={fadeUp} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:24, fontFamily:'var(--font-mono)', fontSize:11, letterSpacing:'0.14em', textTransform:'uppercase', color:'#8892a4' }}>
+                <span style={{ width:18, height:1, background:'#e2e8f4' }} />
+                The mock interview platform
               </motion.div>
-            ))}
+
+              <motion.h1
+                variants={fadeUp}
+                style={{ fontFamily:'var(--font-display)', fontSize:'clamp(2.6rem,5.5vw,5.4rem)', fontWeight:600, lineHeight:0.96, letterSpacing:'-0.035em', color:'#e2e8f4' }}
+              >
+                Solve it.
+                <br />
+                <span style={{ position:'relative', display:'inline-block' }}>
+                  Explain it.
+                  <svg
+                    viewBox="0 0 280 14"
+                    preserveAspectRatio="none"
+                    style={{ position:'absolute', left:0, right:0, bottom:-6, width:'100%', height:14, pointerEvents:'none' }}
+                  >
+                    <path
+                      d="M2 8 C 60 1, 140 13, 278 5"
+                      stroke={GREEN} strokeWidth="3" fill="none" strokeLinecap="round"
+                      style={{ strokeDasharray:600, strokeDashoffset:600, animation:'underline-draw 1.2s 0.4s ease-out forwards' }}
+                    />
+                  </svg>
+                </span>
+                <br />
+                <span style={{ color:'#4a5568', fontStyle:'italic' }}>Get the offer.</span>
+              </motion.h1>
+
+              <motion.p variants={fadeUp} style={{ marginTop:26, maxWidth:480, fontSize:17, lineHeight:1.55, color:'#8892a4' }}>
+                A live AI interviewer that <em>actually interrupts you</em>, pushes back on hand-wavy answers, and grades you on how you sound — not just whether the tests pass.
+              </motion.p>
+
+              <motion.div variants={fadeUp} style={{ display:'flex', alignItems:'center', gap:14, marginTop:30 }}>
+                <button
+                  onClick={() => navigate('/setup')}
+                  className="btn-primary"
+                >
+                  <span className="btn-dot" />
+                  Run a mock interview
+                  <span className="btn-arrow">→</span>
+                </button>
+                <button
+                  onClick={() => navigate('/sample-feedback')}
+                  className="btn-ghost-pill"
+                >
+                  ▶︎ See sample feedback
+                </button>
+              </motion.div>
+
+              {/* Social proof */}
+              <motion.div variants={fadeUp} style={{ display:'flex', alignItems:'center', gap:24, marginTop:40, color:'#8892a4', fontSize:13 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <span style={{ display:'inline-flex' }}>
+                    {AVATAR_COLORS.map((bg, i) => (
+                      <span key={i} style={{ width:24, height:24, borderRadius:99, background:bg, border:'2px solid #0c0e14', marginLeft:i?-8:0, display:'inline-block' }} />
+                    ))}
+                  </span>
+                  <span><strong style={{ color:'#e2e8f4' }}>11,400+</strong> mocks run this week</span>
+                </div>
+                <div style={{ width:1, height:14, background:'rgba(255,255,255,0.1)' }} />
+                <div>★★★★★ <strong style={{ color:'#e2e8f4' }}>4.9</strong> · ProductHunt #1</div>
+              </motion.div>
+            </div>
+
+            {/* Right: animated artifacts */}
+            <motion.div variants={fadeUp} style={{ position:'relative', height:460 }} className="hidden lg:block">
+              <div style={{ position:'absolute', top:0, right:0, width:460, transform:'rotate(-1.5deg)' }}>
+                <TypingCode active={active} />
+              </div>
+              <div style={{ position:'absolute', bottom:0, left:0, width:420, transform:'rotate(1.2deg)' }}>
+                <Transcript active={active} />
+              </div>
+              <div style={{ position:'absolute', top:18, left:14, fontFamily:'var(--font-mono)', fontSize:11, color:'#4a5568', transform:'rotate(-4deg)' }}>
+                ↘ live, every keystroke
+              </div>
+              <div style={{
+                position:'absolute', bottom:250, right:30,
+                fontFamily:'var(--font-mono)', fontSize:11, color:'#22c55e',
+                transform:'rotate(4deg)',
+                padding:'4px 10px', background:'rgba(34,197,94,0.10)', borderRadius:99,
+                border:'1px solid rgba(34,197,94,0.25)',
+              }}>
+                ↑ AI interrupts here
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="mx-auto max-w-7xl px-6">
+      {/* ════════════════════════════════════════
+          MARQUEE
+      ════════════════════════════════════════ */}
+      <section style={{ padding:'40px 0 32px', borderTop:'1px solid rgba(255,255,255,0.06)', borderBottom:'1px solid rgba(255,255,255,0.06)', position:'relative', zIndex:1, overflow:'hidden' }}>
+        <p className="mono-eyebrow" style={{ textAlign:'center', marginBottom:18 }}>practice for the loop at</p>
+        <div style={{ overflow:'hidden', maskImage:'linear-gradient(to right, transparent, #0c0e14 8%, #0c0e14 92%, transparent)', WebkitMaskImage:'linear-gradient(to right, transparent, #0c0e14 8%, #0c0e14 92%, transparent)' }}>
+          <div style={{ display:'flex', gap:64, width:'max-content', animation:'marquee 30s linear infinite', paddingLeft:36 }}>
+            {[...COMPANIES, ...COMPANIES].map((co, i) => (
+              <span key={i} style={{ fontFamily:'var(--font-display)', fontWeight:600, fontSize:24, color:'#4a5568', letterSpacing:'-0.02em', whiteSpace:'nowrap' }}>
+                {co}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          SECTION 02 — SCORE BREAKDOWN
+      ════════════════════════════════════════ */}
+      <section style={{ padding:'96px 36px 24px', position:'relative', zIndex:1 }}>
+        <div style={{ maxWidth:1280, margin:'0 auto' }}>
+          {/* Section eyebrow */}
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
+            className="mono-eyebrow"
+            style={{ display:'flex', alignItems:'center', gap:14, marginBottom:36 }}
           >
-            <p className="mb-8 text-center font-mono text-xs uppercase tracking-widest text-paper-faint">
-              Practice for interviews at
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-              {companies.map((co) => (
-                <span
-                  key={co}
-                  className="font-sans text-lg font-semibold text-paper-faint/40 transition-colors duration-200 hover:text-paper-dim"
-                >
-                  {co}
-                </span>
-              ))}
+            <span style={{ fontWeight:600, color:'#e2e8f4' }}>№ 02</span>
+            <span style={{ flex:1, height:1, background:'rgba(255,255,255,0.1)' }} />
+            <span>scored on what actually matters</span>
+          </motion.div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1.2fr 1fr', gap:64, alignItems:'center' }}>
+            <h2 style={{ fontSize:'clamp(2rem,4vw,4rem)', fontWeight:600, letterSpacing:'-0.035em', lineHeight:0.98, fontFamily:'var(--font-display)', color:'#e2e8f4' }}>
+              We don't grade you<br />on tests passed.<br />
+              <span style={{ color:'#4a5568' }}>We grade you on </span><br />
+              how you{' '}
+              <em style={{ color: GREEN, fontStyle:'italic' }}>sound</em>.
+            </h2>
+
+            <div
+              ref={scoreRef}
+              style={{
+                display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:32, padding:32,
+                background:'#13151c', border:'1px solid rgba(255,255,255,0.07)',
+                borderRadius:20, boxShadow:'0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -8px rgba(0,0,0,0.7)',
+              }}
+            >
+              {scoresVisible && <>
+                <Dial value={84} label="Clarity"     color={GREEN}     delay={0}   />
+                <Dial value={71} label="Confidence"  color="#5B5BD6"   delay={200} />
+                <Dial value={92} label="Structure"   color="#15A874"   delay={400} />
+                <Dial value={66} label="Conciseness" color="#E8A317"   delay={600} />
+              </>}
+              {!scoresVisible && (
+                <div style={{ gridColumn:'1/-1', height:200, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <span className="mono-eyebrow">scroll to reveal</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          BROWSER SCROLL REVEAL (kept component)
+      ════════════════════════════════════════ */}
+      <BrowserScrollReveal />
+
+      {/* ════════════════════════════════════════
+          SECTION 03 — FEATURE INDEX
+      ════════════════════════════════════════ */}
+      <section style={{ padding:'96px 36px 24px', position:'relative', zIndex:1 }}>
+        <div style={{ maxWidth:1280, margin:'0 auto' }}>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="mono-eyebrow"
+            style={{ display:'flex', alignItems:'center', gap:14, marginBottom:36 }}
+          >
+            <span style={{ fontWeight:600, color:'#e2e8f4' }}>№ 03</span>
+            <span style={{ flex:1, height:1, background:'rgba(255,255,255,0.1)' }} />
+            <span>built for the way real loops feel</span>
+          </motion.div>
+
+          <div style={{ borderTop:'1px solid rgba(255,255,255,0.1)' }}>
+            {FEATURES.map(f => <FeatureRow key={f.k} {...f} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          BOTTOM CTA STRIP
+      ════════════════════════════════════════ */}
+      <section style={{ padding:'56px 36px 80px', position:'relative', zIndex:1 }}>
+        <div style={{ maxWidth:1280, margin:'0 auto' }}>
+          <motion.div
+            initial={{ opacity:0, y:24 }}
+            whileInView={{ opacity:1, y:0 }}
+            viewport={{ once:true }}
+            transition={{ duration:0.55 }}
+            style={{
+              display:'flex', alignItems:'center', justifyContent:'space-between',
+              padding:'36px 40px', borderRadius:24,
+              background:'linear-gradient(135deg, #13151c 0%, #191d28 100%)',
+              border:'1px solid rgba(34,197,94,0.2)',
+              boxShadow:'0 0 60px -20px rgba(34,197,94,0.15)',
+              position:'relative', overflow:'hidden',
+              flexWrap:'wrap', gap:24,
+            }}
+          >
+            <div style={{ position:'relative' }}>
+              <h3 style={{ fontSize:'clamp(1.5rem,3vw,2.25rem)', fontWeight:600, letterSpacing:'-0.025em', fontFamily:'var(--font-display)', color:'#e2e8f4' }}>
+                Your next interview is{' '}
+                <span style={{ color: GREEN }}>waiting</span>.
+              </h3>
+              <p style={{ color:'#8892a4', marginTop:6, fontSize:15 }}>
+                Set up a mock session in under 60 seconds. Start with one.
+              </p>
+            </div>
+
+            <div style={{ position:'relative', display:'flex', gap:12 }}>
+              <button
+                onClick={() => navigate('/setup')}
+                className="btn-primary"
+              >
+                <span className="btn-dot" />
+                Start practicing
+                <span className="btn-arrow">→</span>
+              </button>
+              <button
+                onClick={() => navigate('/sample-feedback')}
+                className="btn-ghost-pill"
+                style={{ color:'#e2e8f4', borderColor:'rgba(255,255,255,0.20)' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.20)'; e.currentTarget.style.background = 'transparent' }}
+              >
+                View feedback sample
+              </button>
             </div>
           </motion.div>
         </div>
       </section>
 
-      <section className="relative border-t border-ink-700/40 py-24">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute bottom-0 left-1/2 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-ember/3 blur-[100px]" />
-        </div>
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.55 }}
-          className="mx-auto max-w-2xl px-6 text-center"
-        >
-          <h2 className="mb-4 font-sans text-4xl font-extrabold text-paper md:text-5xl">
-            Ready to run a mock interview?
-          </h2>
-          <p className="mb-8 text-paper-dim">Set up your session in 60 seconds.</p>
-          <button
-            onClick={() => navigate('/setup')}
-            className="group inline-flex items-center gap-3 rounded-sm bg-ember px-8 py-4 font-mono text-sm font-medium uppercase tracking-widest text-ink-950 transition-all duration-200 hover:bg-ember-soft active:scale-[0.97]"
-          >
-            Start practicing now
-            <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-          </button>
-        </motion.div>
-      </section>
     </div>
   )
 }

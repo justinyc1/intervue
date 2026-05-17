@@ -48,7 +48,7 @@ function Waveform({ speaking }: { speaking: boolean }) {
         const h = Math.max(2, baseAmp * H)
         const x = i * (BAR_W + 2), y = (H - h) / 2
         const alpha = speaking ? 0.7 + 0.3 * (h / H) : 0.25
-        ctx.fillStyle = `rgba(255, 107, 53, ${alpha})`
+        ctx.fillStyle = `rgba(34, 197, 94, ${alpha})`
         ctx.beginPath()
         ctx.roundRect(x, y, BAR_W, h, 2)
         ctx.fill()
@@ -244,7 +244,12 @@ export function BehavioralInterview() {
   const personaInitial = persona.charAt(0).toUpperCase()
 
   return (
-    <div className="flex h-screen flex-col bg-ink-950 overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="flex h-screen flex-col bg-ink-950 overflow-hidden"
+    >
       {/* Top bar */}
       <div className="flex items-center justify-between border-b border-ink-700/60 bg-ink-900 px-4 py-2">
         <div className="flex items-center gap-3">
@@ -379,6 +384,6 @@ export function BehavioralInterview() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

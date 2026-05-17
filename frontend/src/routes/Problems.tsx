@@ -18,7 +18,7 @@ const fadeUp = {
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
   const styles: Record<string, string> = {
     easy: 'text-moss bg-moss/10 border-moss/20',
-    medium: 'text-[#F97316] bg-[#F97316]/10 border-[#F97316]/20',
+    medium: 'text-[#f59e0b] bg-[#f59e0b]/10 border-[#f59e0b]/20',
     hard: 'text-crimson bg-crimson/10 border-crimson/20',
   }
   return (

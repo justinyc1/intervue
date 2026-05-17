@@ -35,7 +35,7 @@ type DrawStroke =
   | { type: "ellipse"; x: number; y: number; w: number; h: number; color: string; width: number }
   | { type: "line"; x1: number; y1: number; x2: number; y2: number; color: string; width: number };
 
-const DRAW_COLORS = ["#E4E4E7", "#4ADE80", "#F87171", "#60A5FA", "#FBBF24", "#C084FC", "#F97316"];
+const DRAW_COLORS = ["#e2e8f4", "#22c55e", "#f87171", "#60A5FA", "#FBBF24", "#C084FC", "#4ade80"];
 const STROKE_SIZES = [1, 2, 4, 8];
 const ERASER_SIZES = [12, 24, 48, 96];
 
@@ -83,7 +83,7 @@ function redrawCanvas(canvas: HTMLCanvasElement, strokes: DrawStroke[], preview?
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.strokeStyle = "rgba(228,228,231,0.04)";
+  ctx.strokeStyle = "rgba(255,255,255,0.06)";
   ctx.lineWidth = 1;
   const grid = 40;
   for (let x = 0; x <= canvas.width; x += grid) {
@@ -358,7 +358,7 @@ function Whiteboard() {
       </div>
 
       {/* Canvas */}
-      <div ref={containerRef} className="relative flex-1 overflow-hidden bg-ink-950">
+      <div ref={containerRef} className="relative flex-1 overflow-hidden bg-[#191d28]">
         <canvas
           ref={canvasRef}
           className="absolute inset-0"
@@ -371,7 +371,7 @@ function Whiteboard() {
         {/* Custom eraser cursor */}
         {isEraser && cursorPos && (
           <div
-            className="pointer-events-none absolute rounded-sm border border-paper/50 bg-paper/8"
+            className="pointer-events-none absolute rounded-sm border border-paper/30 bg-paper/5"
             style={{
               left: cursorPos.x - eraserSize / 2,
               top: cursorPos.y - eraserSize / 2,
@@ -403,53 +403,6 @@ function useCountdown(totalSecs: number) {
 }
 
 
-function TimerRing({
-  timeStr,
-  totalSecs,
-  remainSecs,
-}: {
-  timeStr: string;
-  totalSecs: number;
-  remainSecs: number;
-}) {
-  const pct = remainSecs / totalSecs;
-  const r = 28;
-  const circ = 2 * Math.PI * r;
-  const offset = circ * (1 - pct);
-  const color = pct > 0.4 ? "#FF6B35" : "#B23A3A";
-  return (
-    <div className="relative flex h-20 w-20 items-center justify-center">
-      <svg
-        className="absolute inset-0 -rotate-90"
-        width="80"
-        height="80"
-        viewBox="0 0 80 80"
-      >
-        <circle
-          cx="40"
-          cy="40"
-          r={r}
-          fill="none"
-          stroke="rgba(250,247,242,0.06)"
-          strokeWidth="3"
-        />
-        <circle
-          cx="40"
-          cy="40"
-          r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth="3"
-          strokeDasharray={circ}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          style={{ transition: "stroke-dashoffset 1s linear, stroke 0.5s" }}
-        />
-      </svg>
-      <span className="font-mono text-xs text-paper">{timeStr}</span>
-    </div>
-  );
-}
 
 
 interface TestResultUI {
@@ -824,24 +777,55 @@ export function TechnicalInterview() {
   const problem = question?.problem;
   const persona = session?.interviewer_tone ?? "neutral";
   const personaInitial = persona.charAt(0).toUpperCase();
+  const personaColor: Record<string, string> = {
+    friendly: '#22c55e', supportive: '#22c55e',
+    neutral: '#5B5BD6', corporate: '#5B5BD6',
+    intense: '#f87171', pressure: '#f87171',
+    skeptical: '#f87171', probing: '#f87171',
+  };
+  const avatarColor = personaColor[persona] ?? '#5B5BD6';
 
 
   return (
-    <div className="flex h-screen flex-col bg-ink-950 overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="flex h-screen flex-col bg-ink-950 overflow-hidden"
+    >
       {/* Top bar */}
-      <div className="flex items-center justify-between border-b border-ink-700/60 bg-ink-900 px-4 py-2">
-        <div className="flex items-center gap-3">
-          <span className="font-mono text-xs text-ember">◆</span>
-          <span className="font-display text-sm font-semibold text-paper">
-            Intervue
+      <div className="flex items-center gap-3 border-b border-ink-700/60 bg-ink-900 px-4 py-2.5">
+        <div className="flex items-center gap-2 shrink-0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M4 18 L12 4 L20 18 L15 18 L12 12 L9 18 Z" fill="#e2e8f4" />
+            <circle cx="19.5" cy="4.5" r="2.2" fill="#22c55e" />
+          </svg>
+          <span className="font-display text-sm font-bold text-paper" style={{ letterSpacing: '-0.02em' }}>Intervue</span>
+          <span className="text-paper-faint/40 hidden sm:inline">/</span>
+          <span className="hidden sm:inline font-mono text-xs text-paper-faint">
+            technical{session?.company ? ` · ${session.company.toLowerCase()}` : ""}
+            {problem ? ` · ${problem.title.toLowerCase()}` : ""}
           </span>
-          <span className="hidden sm:inline font-mono text-xs text-paper-faint ml-2">
-            Technical{session?.company ? ` · ${session.company}` : ""}
-          </span>
+        </div>
+        <div className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-ember/8 border border-ember/25">
+          <span className="live-dot" />
+          <span className="font-mono text-[11px] text-ember tracking-widest">LIVE · {(session?.interviewer_tone ?? 'AI').toUpperCase()}</span>
+        </div>
+        <div className="flex-1" />
+        <div className="hidden sm:flex items-center gap-2 font-mono text-xs text-paper">
+          <span className="text-paper-faint text-[11px]">elapsed</span>
+          <span className="font-semibold">{timeStr}</span>
+          <span className="text-paper-faint text-[11px]">/ {String(Math.floor(totalSecs / 60)).padStart(2,'0')}:00</span>
+        </div>
+        <div className="hidden sm:block w-24 h-1 bg-ink-700/40 rounded-full overflow-hidden mx-2">
+          <div
+            className="h-full bg-ember rounded-full transition-all"
+            style={{ width: `${Math.max(0, ((totalSecs - remainSecs) / totalSecs) * 100)}%` }}
+          />
         </div>
         <button
           onClick={() => endSession()}
-          className="font-mono text-xs uppercase tracking-widest text-paper-faint hover:text-crimson transition-colors border border-ink-700/60 px-3 py-1 rounded-sm hover:border-crimson/40"
+          className="font-mono text-xs uppercase tracking-widest text-crimson border border-crimson/30 bg-crimson/5 px-3 py-1 rounded-sm hover:bg-crimson/10 hover:border-crimson/50 transition-all shrink-0"
         >
           End session
         </button>
@@ -941,10 +925,10 @@ export function TechnicalInterview() {
               value={language}
               onChange={(e) => handleLanguageChange(e.target.value as Language)}
               disabled={whiteboardMode}
-              className="rounded-sm border border-ink-700/60 bg-ink-800 px-2.5 py-1.5 font-mono text-xs text-paper-dim focus:border-ember/50 focus:outline-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-sm border border-ink-700/60 bg-ink-800 px-2.5 py-1.5 font-mono text-xs text-paper-dim focus:border-ember/50 focus:outline-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed appearance-none"
             >
               {LANGUAGES.map((lang) => (
-                <option key={lang.id} value={lang.id} className="bg-ink-800">
+                <option key={lang.id} value={lang.id}>
                   {lang.label}
                 </option>
               ))}
@@ -994,7 +978,7 @@ export function TechnicalInterview() {
                 theme="vs-dark"
                 options={{
                   fontSize: 13,
-                  fontFamily: '"JetBrains Mono", monospace',
+                  fontFamily: '"Geist Mono", "JetBrains Mono", monospace',
                   fontLigatures: true,
                   lineHeight: 1.7,
                   padding: { top: 16, bottom: 16 },
@@ -1084,10 +1068,13 @@ export function TechnicalInterview() {
         )}>
           <div className="border-b border-ink-700/60 p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className="relative flex h-9 w-9 items-center justify-center rounded-full border border-ink-700/80 bg-ink-800 font-display text-sm font-semibold text-paper">
+              <div
+                className="relative flex h-10 w-10 items-center justify-center rounded-full font-display text-sm font-semibold text-white shrink-0"
+                style={{ background: `linear-gradient(135deg, ${avatarColor}, ${avatarColor}AA)` }}
+              >
                 {personaInitial}
                 {interviewerSpeaking && (
-                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-ember animate-pulse border border-ink-900" />
+                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-ember animate-pulse border-2 border-ink-900" />
                 )}
               </div>
               <div>
@@ -1173,18 +1160,23 @@ export function TechnicalInterview() {
               transcript.map((seg, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, x: -6 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25 }}
-                  className="flex gap-2"
+                  className={cn(
+                    "rounded-xl border px-3 py-2",
+                    seg.speaker === "ai"
+                      ? "border-ink-700/50 bg-ink-800/40"
+                      : "border-ember/20 bg-ember/5",
+                  )}
                 >
                   <span
                     className={cn(
-                      "mt-0.5 shrink-0 font-mono text-[9px] font-medium uppercase",
+                      "mb-1 block font-mono text-[9px] font-semibold uppercase tracking-widest",
                       seg.speaker === "ai" ? "text-paper-faint" : "text-ember",
                     )}
                   >
-                    {seg.speaker === "ai" ? "INT" : "YOU"}
+                    {seg.speaker === "ai" ? "INTERVIEWER" : "YOU"}
                   </span>
                   <p className="text-xs leading-relaxed text-paper-dim">
                     {seg.text}
@@ -1195,12 +1187,16 @@ export function TechnicalInterview() {
           </div>
 
 
-          <div className="flex items-center justify-end border-t border-ink-700/60 p-4">
-            <TimerRing
-              timeStr={timeStr}
-              totalSecs={totalSecs}
-              remainSecs={remainSecs}
-            />
+          <div className="flex items-center justify-between border-t border-ink-700/60 px-4 py-3">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-paper-faint">
+              {remainSecs > 0 ? 'time left' : 'time up'}
+            </span>
+            <span className={cn(
+              "font-mono text-sm font-semibold tabular-nums",
+              remainSecs < 300 ? "text-crimson" : remainSecs < 600 ? "text-ember" : "text-paper",
+            )}>
+              {timeStr}
+            </span>
           </div>
         </div>
       </div>
@@ -1225,6 +1221,6 @@ export function TechnicalInterview() {
           </button>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
