@@ -43,7 +43,6 @@ export function NavBar() {
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-[16px]">
 
-        {/* Wordmark */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <Logo />
           <span
@@ -54,7 +53,6 @@ export function NavBar() {
           </span>
         </Link>
 
-        {/* Nav links */}
         <div className="hidden items-center gap-7 md:flex">
           {NAV_LINKS.map(({ to, label }) => (
             <Link
@@ -78,7 +76,6 @@ export function NavBar() {
           ))}
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-2.5">
           <SignedOut>
             <SignInButton mode="modal">

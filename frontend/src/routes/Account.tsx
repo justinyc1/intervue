@@ -44,10 +44,10 @@ function ModeBar({ label, count, total, color }: { label: string; count: number;
 
 function ActivityGrid({ sessions }: { sessions: ApiSession[] }) {
   const weeks = 12
-  const today = new Date()
-  today.setHours(23, 59, 59, 999)
 
   const cells = useMemo(() => {
+    const today = new Date()
+    today.setHours(23, 59, 59, 999)
     const map: Record<string, number> = {}
     for (const s of sessions) {
       const d = new Date(s.created_at)
