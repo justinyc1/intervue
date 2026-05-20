@@ -213,7 +213,7 @@ export function Feedback() {
           }
         }
       } catch {
-        // 404 means not ready yet — retry is scheduled by the timeout effect
+        // 404 means not ready yet - retry is scheduled by the timeout effect
       }
     }
 
@@ -300,16 +300,8 @@ export function Feedback() {
 
   return (
     <div className="min-h-screen bg-ink-950">
-      {/* Header bar */}
-      <div className="sticky top-0 z-10 border-b border-ink-700/60 bg-ink-900/90 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-3">
-          <div className="flex items-center gap-2">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M4 18 L12 4 L20 18 L15 18 L12 12 L9 18 Z" fill="#e2e8f4" />
-              <circle cx="19.5" cy="4.5" r="2.2" fill="#22c55e" />
-            </svg>
-            <span className="font-display text-sm font-bold text-paper" style={{ letterSpacing: '-0.02em' }}>Intervue</span>
-          </div>
+      <div className="sticky top-0 z-10 border-ink-700/60 bg-ink-950 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-3">          
           <span className="font-mono text-xs text-paper-faint ml-2">SESSION RECAP · {sessionDate.toUpperCase()}</span>
           <div className="flex-1" />
           <button
@@ -327,7 +319,6 @@ export function Feedback() {
 
       <motion.div variants={stagger} initial="hidden" animate="show" className="mx-auto max-w-5xl px-6 py-10">
 
-        {/* Editorial headline + score card */}
         <motion.div variants={fadeUp} className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
           <div className="flex flex-col justify-center">
             <p className="mb-3 font-mono text-xs uppercase tracking-widest text-ember">YOUR RESULT</p>
@@ -371,7 +362,6 @@ export function Feedback() {
           </div>
         </motion.div>
 
-        {/* Strengths + Improvements */}
         <motion.div variants={fadeUp} className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border border-moss/20 bg-moss/[0.04] p-5">
             <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-moss">↑ Top Strengths</p>
@@ -429,7 +419,6 @@ export function Feedback() {
           </motion.div>
         )}
 
-        {/* Bottom actions */}
         <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3 border-t border-ink-700/40 pt-8">
           {session?.audio_s3_url ? (
             <div className="flex flex-col gap-1">

@@ -310,14 +310,7 @@ export function BrowserScrollReveal() {
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#22c55e', flexShrink: 0 }}>● LIVE</span>
                       </div>
 
-                      <div
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: '160px 1fr 155px',
-                          minHeight: 290,
-                          overflow: 'hidden',
-                        }}
-                      >
+                      <div className="laptop-grid">
                         <ProblemPanel />
                         <div style={{ minWidth: 0, overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
                           <EditorPanel />

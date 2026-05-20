@@ -249,7 +249,6 @@ export function ResumeInterview() {
       transition={{ duration: 0.4 }}
       className="flex h-screen flex-col bg-ink-950 overflow-hidden"
     >
-      {/* Top bar */}
       <div className="flex items-center justify-between border-b border-ink-700/60 bg-ink-900 px-4 py-2">
         <div className="flex items-center gap-3">
           <span className="font-mono text-xs text-ember">◆</span>
@@ -271,7 +270,6 @@ export function ResumeInterview() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Main centered content */}
         <div className="flex flex-1 flex-col items-center justify-center px-6 py-10">
           {connecting ? (
             <div className="text-center">
@@ -297,7 +295,6 @@ export function ResumeInterview() {
                 </div>
               </div>
 
-              {/* Interviewer persona card */}
               <div className="mb-8 flex items-center gap-3 rounded-md border border-ink-700/60 bg-ink-900 px-5 py-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ink-800 font-display text-sm font-semibold text-paper border border-ink-700/80">
                   {personaInitial}
@@ -320,7 +317,6 @@ export function ResumeInterview() {
                 )}
               </div>
 
-              {/* Controls */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => {
@@ -349,7 +345,6 @@ export function ResumeInterview() {
           )}
         </div>
 
-        {/* Right: transcript drawer */}
         <div className="flex w-[280px] shrink-0 flex-col border-l border-ink-700/60 bg-ink-900">
           <div className="flex items-center gap-2 border-b border-ink-700/60 p-3">
             <span className="font-mono text-xs uppercase tracking-widest text-paper">Transcript</span>

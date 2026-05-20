@@ -271,6 +271,41 @@ body::after {
   to   { transform: translateX(-50%); }
 }
 
+/* Feature index rows — responsive grid */
+.feature-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+@media (min-width: 768px) {
+  .feature-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 1.6fr 24px;
+    align-items: center;
+    gap: 24px;
+  }
+}
+.feature-row-arrow { display: none; }
+@media (min-width: 768px) {
+  .feature-row-arrow { display: block; }
+}
+
+/* Laptop mockup — hide side panels on mobile */
+.laptop-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr 155px;
+  min-height: 290px;
+  overflow: hidden;
+}
+@media (max-width: 639px) {
+  .laptop-grid {
+    grid-template-columns: 60fr 40fr;
+  }
+  .laptop-grid > *:first-child {
+    display: none;
+  }
+}
+
 /* Shimmer skeleton */
 .skeleton {
   background: linear-gradient(

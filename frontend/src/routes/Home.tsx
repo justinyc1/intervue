@@ -70,7 +70,6 @@ function TypingCode({ active }: { active: boolean }) {
       lineHeight: 1.75,
       boxShadow: '0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -8px rgba(0,0,0,0.7)',
     }}>
-      {/* Chrome bar */}
       <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10, paddingBottom:10, borderBottom:'1px dashed rgba(255,255,255,0.06)' }}>
         <span style={{ width:9, height:9, borderRadius:99, background:'#FF5F57' }} />
         <span style={{ width:9, height:9, borderRadius:99, background:'#FEBC2E' }} />
@@ -248,9 +247,6 @@ function FeatureRow({ k, title, body }: { k: string; title: string; body: string
 // ── Companies marquee ────────────────────────────────────
 const COMPANIES = ['Google', 'Meta', 'Amazon', 'Apple', 'Microsoft', 'Stripe', 'Netflix', 'Airbnb', 'OpenAI', 'Anthropic', 'Databricks', 'Figma']
 
-// ── Social proof avatars ─────────────────────────────────
-const AVATAR_COLORS = ['rgba(34,197,94,0.3)', 'rgba(130,170,255,0.3)', 'rgba(248,113,113,0.3)', 'rgba(251,191,36,0.3)']
-
 // ── Main component ───────────────────────────────────────
 export function Home() {
   const navigate = useNavigate()
@@ -272,14 +268,12 @@ export function Home() {
   return (
     <div style={{ background:'#0c0e14', minHeight:'100vh' }}>
 
-      {/* ── Radial hero background gradient ── */}
       <div aria-hidden style={{
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
         background: 'radial-gradient(ellipse at 60% 0%, rgba(34,197,94,0.06) 0%, transparent 60%)',
         pointerEvents: 'none', zIndex: 0,
       }} />
 
-      {/* ── Background blob ── */}
       <div
         aria-hidden
         style={{
@@ -289,9 +283,6 @@ export function Home() {
         }}
       />
 
-      {/* ════════════════════════════════════════
-          HERO
-      ════════════════════════════════════════ */}
       <section className="relative z-[1] px-4 sm:px-6 lg:px-9 pt-14 pb-10">
         <div style={{ maxWidth:1280, margin:'0 auto' }}>
           <motion.div
@@ -300,7 +291,6 @@ export function Home() {
             animate="show"
             className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 lg:gap-12 items-center"
           >
-            {/* Left: copy */}
             <div className="flex flex-col">
               <motion.div variants={fadeUp} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:24, fontFamily:'var(--font-mono)', fontSize:11, letterSpacing:'0.14em', textTransform:'uppercase', color:'#8892a4' }}>
                 <span style={{ width:18, height:1, background:'#e2e8f4' }} />
@@ -351,23 +341,8 @@ export function Home() {
                   ▶︎ See sample feedback
                 </button>
               </motion.div>
-
-              {/* Social proof */}
-              <motion.div variants={fadeUp} style={{ display:'flex', alignItems:'center', gap:16, marginTop:40, color:'#8892a4', fontSize:13, flexWrap:'wrap' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                  <span style={{ display:'inline-flex' }}>
-                    {AVATAR_COLORS.map((bg, i) => (
-                      <span key={i} style={{ width:24, height:24, borderRadius:99, background:bg, border:'2px solid #0c0e14', marginLeft:i?-8:0, display:'inline-block' }} />
-                    ))}
-                  </span>
-                  <span><strong style={{ color:'#e2e8f4' }}>11,400+</strong> mocks run this week</span>
-                </div>
-                <div style={{ width:1, height:14, background:'rgba(255,255,255,0.1)' }} />
-                <div>★★★★★ <strong style={{ color:'#e2e8f4' }}>4.9</strong> · ProductHunt #1</div>
-              </motion.div>
             </div>
 
-            {/* Right: animated artifacts */}
             <motion.div variants={fadeUp} style={{ position:'relative', height:460 }} className="hidden lg:block">
               <div style={{ position:'absolute', top:0, right:0, width:460, transform:'rotate(-1.5deg)' }}>
                 <TypingCode active={active} />
@@ -392,9 +367,6 @@ export function Home() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════
-          MARQUEE
-      ════════════════════════════════════════ */}
       <section style={{ padding:'40px 0 32px', borderTop:'1px solid rgba(255,255,255,0.06)', borderBottom:'1px solid rgba(255,255,255,0.06)', position:'relative', zIndex:1, overflow:'hidden' }}>
         <p className="mono-eyebrow" style={{ textAlign:'center', marginBottom:18 }}>practice for the loop at</p>
         <div style={{ overflow:'hidden', maskImage:'linear-gradient(to right, transparent, #0c0e14 8%, #0c0e14 92%, transparent)', WebkitMaskImage:'linear-gradient(to right, transparent, #0c0e14 8%, #0c0e14 92%, transparent)' }}>
@@ -408,12 +380,8 @@ export function Home() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════
-          SECTION 02 — SCORE BREAKDOWN
-      ════════════════════════════════════════ */}
       <section className="relative z-[1] px-4 sm:px-6 lg:px-9 pt-24 pb-6">
         <div style={{ maxWidth:1280, margin:'0 auto' }}>
-          {/* Section eyebrow */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -459,14 +427,8 @@ export function Home() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════
-          BROWSER SCROLL REVEAL (kept component)
-      ════════════════════════════════════════ */}
       <BrowserScrollReveal />
 
-      {/* ════════════════════════════════════════
-          SECTION 03 — FEATURE INDEX
-      ════════════════════════════════════════ */}
       <section className="relative z-[1] px-4 sm:px-6 lg:px-9 pt-24 pb-6">
         <div style={{ maxWidth:1280, margin:'0 auto' }}>
           <motion.div
@@ -488,9 +450,6 @@ export function Home() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════
-          BOTTOM CTA STRIP
-      ════════════════════════════════════════ */}
       <section className="relative z-[1] px-4 sm:px-6 lg:px-9 pt-14 pb-20">
         <div style={{ maxWidth:1280, margin:'0 auto' }}>
           <motion.div

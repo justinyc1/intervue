@@ -162,7 +162,6 @@ function PersonaCard({
       )}
     >
       <div className="flex items-center gap-3 mb-3">
-        {/* Avatar */}
         <div
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white text-base font-semibold"
           style={{ background: `linear-gradient(135deg, ${color}, ${color}AA)`, fontFamily: 'var(--font-display)' }}
@@ -381,10 +380,8 @@ export function Setup() {
   return (
     <div className="min-h-screen bg-ink-950">
 
-      {/* ── Top bar ── */}
       <div className="bg-ink-950 border-b border-white/[0.06]" style={{ padding: '18px 36px' }}>
         <div className="mx-auto max-w-5xl flex items-center gap-4">
-          {/* Logo + step label */}
           <div className="flex items-center gap-3 shrink-0">
           </div>
 
@@ -392,7 +389,6 @@ export function Setup() {
             Session setup · {stepNumLabel} / {totalLabel}
           </span>
 
-          {/* Progress bar */}
           <div className="flex-1 mx-4 h-[3px] rounded-full overflow-hidden bg-ink-700/60">
             <motion.div
               className="h-full rounded-full bg-ember"
@@ -410,11 +406,9 @@ export function Setup() {
         </div>
       </div>
 
-      {/* ── Body ── */}
       <div className="mx-auto max-w-5xl px-6 py-12">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_300px]">
 
-          {/* Main content */}
           <div>
             <AnimatePresence mode="wait">
               <motion.div
@@ -424,12 +418,10 @@ export function Setup() {
                 animate="center"
                 exit="exit"
               >
-                {/* Step eyebrow */}
                 <p className="font-mono text-[11px] uppercase tracking-widest text-ember mb-2">
                   {eyebrow}
                 </p>
 
-                {/* Heading */}
                 <h1
                   className="font-semibold text-paper mb-3"
                   style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,4vw,3.25rem)', letterSpacing: '-0.03em', lineHeight: 1 }}
@@ -438,7 +430,6 @@ export function Setup() {
                 </h1>
                 <p className="text-[15px] text-paper-dim mb-10 max-w-[520px] leading-relaxed">{subtitle}</p>
 
-                {/* ─── Step 1: Interview type ─── */}
                 {step === 1 && (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     {INTERVIEW_TYPES.map(t => (
@@ -454,7 +445,6 @@ export function Setup() {
                   </div>
                 )}
 
-                {/* ─── Resume: upload ─── */}
                 {state.interviewType === 'resume' && step === 2 && (
                   <div>
                     <input type="file" accept=".pdf" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
@@ -498,7 +488,6 @@ export function Setup() {
                   </div>
                 )}
 
-                {/* ─── Duration ─── */}
                 {((state.interviewType === 'behavioral' && step === 2) || (state.interviewType === 'resume' && step === 3) || (state.interviewType === 'technical' && step === 5)) && (
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {DURATIONS.map(d => (
@@ -513,7 +502,6 @@ export function Setup() {
                   </div>
                 )}
 
-                {/* ─── Behavioral / Resume personas ─── */}
                 {((state.interviewType === 'behavioral' && step === 3) || (state.interviewType === 'resume' && step === 4)) && (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {behavioralPersonas.map(p => (
@@ -526,7 +514,6 @@ export function Setup() {
                   </div>
                 )}
 
-                {/* ─── Technical: role ─── */}
                 {state.interviewType === 'technical' && step === 2 && (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {ROLES.map(r => (
@@ -536,7 +523,6 @@ export function Setup() {
                   </div>
                 )}
 
-                {/* ─── Technical: company ─── */}
                 {state.interviewType === 'technical' && step === 3 && (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {companies.map(c => (
@@ -547,7 +533,6 @@ export function Setup() {
                   </div>
                 )}
 
-                {/* ─── Technical: difficulty ─── */}
                 {state.interviewType === 'technical' && step === 4 && (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     {DIFFICULTIES.map(d => (
@@ -557,7 +542,6 @@ export function Setup() {
                   </div>
                 )}
 
-                {/* ─── Technical: personas ─── */}
                 {state.interviewType === 'technical' && step === 6 && (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {personas.map(p => (
@@ -572,7 +556,6 @@ export function Setup() {
               </motion.div>
             </AnimatePresence>
 
-            {/* ─── Navigation ─── */}
             <div className="mt-10 flex items-center gap-4">
               {step > 1 && (
                 <button
@@ -616,7 +599,6 @@ export function Setup() {
             </div>
           </div>
 
-          {/* ─── Summary rail ─── */}
           <aside className="hidden lg:block">
             <div className="sticky top-24 rounded-2xl border border-white/[0.07] bg-ink-900 shadow-card overflow-hidden">
               <div className="px-6 pt-5 pb-4 border-b border-white/[0.05]">
@@ -639,7 +621,6 @@ export function Setup() {
                 ))}
               </div>
 
-              {/* HEADS UP box */}
               {headsUp && (
                 <div className="mx-4 mb-4 mt-1 rounded-xl bg-ink-800 p-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -650,7 +631,6 @@ export function Setup() {
                 </div>
               )}
 
-              {/* Empty state */}
               {summaryRows.every(r => !r.value) && !headsUp && (
                 <div className="px-6 pb-5">
                   <p className="text-[12px] text-paper-faint leading-relaxed">

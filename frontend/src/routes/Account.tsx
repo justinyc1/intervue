@@ -174,7 +174,6 @@ export function Account() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
-      {/* Header */}
       <motion.div variants={stagger} initial="hidden" animate="show" className="mb-10">
         <motion.div variants={fadeUp} className="flex items-start gap-5 mb-8">
           {user?.imageUrl ? (
@@ -204,7 +203,6 @@ export function Account() {
           </button>
         </motion.div>
 
-        {/* Stats */}
         <motion.div variants={stagger} className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <StatCard label="Total sessions" value={loading ? '—' : stats.total} sub={`${stats.thisWeek} this week`} />
           <StatCard label="Completed" value={loading ? '—' : stats.completed} sub={stats.total > 0 ? `${Math.round((stats.completed / stats.total) * 100)}% rate` : undefined} />
@@ -219,9 +217,7 @@ export function Account() {
       </motion.div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {/* Left column */}
         <div className="md:col-span-2 space-y-6">
-          {/* Activity */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -235,7 +231,6 @@ export function Account() {
             )}
           </motion.div>
 
-          {/* Recent sessions */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -305,9 +300,7 @@ export function Account() {
           </motion.div>
         </div>
 
-        {/* Right column */}
         <div className="space-y-6">
-          {/* Mode breakdown */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -330,7 +323,6 @@ export function Account() {
             )}
           </motion.div>
 
-          {/* Quick tips */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -360,7 +352,6 @@ export function Account() {
             </div>
           </motion.div>
 
-          {/* Streak / encouragement */}
           {!loading && stats.total > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
