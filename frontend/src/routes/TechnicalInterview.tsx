@@ -257,9 +257,7 @@ function Whiteboard() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      {/* Toolbar */}
       <div className="flex items-center gap-3 border-b border-ink-700/60 bg-ink-900 px-3 py-2">
-        {/* Tools */}
         <div className="flex items-center gap-0.5">
           {TOOL_DEFS.map(({ id, title }) => (
             <button
@@ -280,7 +278,6 @@ function Whiteboard() {
 
         <div className="h-4 w-px bg-ink-700/60" />
 
-        {/* Colors — dimmed when eraser active */}
         <div className={cn("flex items-center gap-1 transition-opacity duration-150", isEraser && "opacity-30 pointer-events-none")}>
           {DRAW_COLORS.map((c) => (
             <button
@@ -298,7 +295,6 @@ function Whiteboard() {
 
         <div className="h-4 w-px bg-ink-700/60" />
 
-        {/* Size selector — switches between pen sizes and eraser sizes */}
         {isEraser ? (
           <div className="flex items-center gap-0.5">
             {ERASER_SIZES.map((sz) => {
@@ -357,7 +353,6 @@ function Whiteboard() {
         </div>
       </div>
 
-      {/* Canvas */}
       <div ref={containerRef} className="relative flex-1 overflow-hidden bg-[#191d28]">
         <canvas
           ref={canvasRef}
@@ -368,7 +363,6 @@ function Whiteboard() {
           onMouseUp={onMouseUp}
           onMouseLeave={() => { setCursorPos(null); onMouseUp({ clientX: 0, clientY: 0 } as React.MouseEvent<HTMLCanvasElement>); }}
         />
-        {/* Custom eraser cursor */}
         {isEraser && cursorPos && (
           <div
             className="pointer-events-none absolute rounded-sm border border-paper/30 bg-paper/5"
@@ -793,7 +787,6 @@ export function TechnicalInterview() {
       transition={{ duration: 0.4 }}
       className="flex h-screen flex-col bg-ink-950 overflow-hidden"
     >
-      {/* Top bar */}
       <div className="flex items-center gap-3 border-b border-ink-700/60 bg-ink-900 px-4 py-2.5">
         <div className="flex items-center gap-2 shrink-0">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -832,9 +825,7 @@ export function TechnicalInterview() {
       </div>
 
 
-      {/* Three-pane layout */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Pane 1: Problem */}
         <div className={cn(
           "flex-col overflow-y-auto border-r border-ink-700/60 bg-ink-900 p-5",
           mobileTab === 'problem' ? "flex flex-1" : "hidden",
@@ -914,7 +905,6 @@ export function TechnicalInterview() {
         </div>
 
 
-        {/* Pane 2: Editor / Whiteboard */}
         <div className={cn(
           "flex-col overflow-hidden",
           mobileTab === 'editor' ? "flex flex-1" : "hidden",
@@ -1060,7 +1050,6 @@ export function TechnicalInterview() {
         </div>
 
 
-        {/* Pane 3: Interviewer + Transcript */}
         <div className={cn(
           "flex-col border-l border-ink-700/60 bg-ink-900",
           mobileTab === 'interviewer' ? "flex flex-1" : "hidden",
@@ -1201,7 +1190,6 @@ export function TechnicalInterview() {
         </div>
       </div>
 
-      {/* Mobile tab bar */}
       <div className="flex shrink-0 border-t border-ink-700/60 bg-ink-900 lg:hidden">
         {([
           { id: 'problem', label: 'Problem', icon: '◧' },

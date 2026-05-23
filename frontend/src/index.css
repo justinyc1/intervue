@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Clerk UserButton popover custom action text override */
+[class*="cl-userButtonPopoverActionButton"] span,
+[class*="cl-userButtonPopoverActionButton"] *,
+[class*="cl-menuButton"] span,
+[class*="cl-menuItem"] span {
+  color: #e2e8f4 !important;
+}
+
 :root {
   /* Surfaces — dark layered */
   --bg:     #0c0e14;
@@ -105,7 +113,7 @@ body::after {
   background-size: 200px 200px;
 }
 
-/* ── Utility classes ─────────────────────────────────────── */
+/* Utility classes */
 .font-display  { font-family: var(--font-display); letter-spacing: -0.02em; }
 .font-mono-ui  { font-family: var(--font-mono); }
 
@@ -127,7 +135,7 @@ body::after {
 /* Hairline rule */
 .hairline { background: var(--hairline); height: 1px; width: 100%; }
 
-/* ── Buttons ─────────────────────────────────────────────── */
+/* Buttons */
 /* Primary — green */
 .btn-primary {
   display: inline-flex;
@@ -239,7 +247,7 @@ body::after {
   box-shadow: var(--shadow-card);
 }
 
-/* Grid / dot background helpers — dark version */
+/* Grid / dot background helpers */
 .bg-dots {
   background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
   background-size: 22px 22px;
@@ -257,13 +265,48 @@ body::after {
   pointer-events: none;
 }
 
-/* ── Marquee ─────────────────────────────────────────────── */
+/* Marquee */
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
 
-/* ── Shimmer skeleton ────────────────────────────────────── */
+/* Feature index rows — responsive grid */
+.feature-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+@media (min-width: 768px) {
+  .feature-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 1.6fr 24px;
+    align-items: center;
+    gap: 24px;
+  }
+}
+.feature-row-arrow { display: none; }
+@media (min-width: 768px) {
+  .feature-row-arrow { display: block; }
+}
+
+/* Laptop mockup — hide side panels on mobile */
+.laptop-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr 155px;
+  min-height: 290px;
+  overflow: hidden;
+}
+@media (max-width: 639px) {
+  .laptop-grid {
+    grid-template-columns: 60fr 40fr;
+  }
+  .laptop-grid > *:first-child {
+    display: none;
+  }
+}
+
+/* Shimmer skeleton */
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -279,7 +322,7 @@ body::after {
   to   { background-position: -200% 0; }
 }
 
-/* ── Slide-in page transition helper ─────────────────────── */
+/* Slide-in page transition helper */
 @keyframes slide-in-up {
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }

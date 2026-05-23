@@ -50,10 +50,10 @@ export default function App() {
         position="bottom-right"
         toastOptions={{
           style: {
-            background: 'var(--ink-800)',
-            border: '1px solid rgba(250,247,242,0.08)',
-            color: 'var(--paper)',
-            fontFamily: 'JetBrains Mono, monospace',
+            background: '#13151c',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#e2e8f4',
+            fontFamily: 'var(--font-mono)',
             fontSize: '12px',
           },
         }}

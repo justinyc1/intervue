@@ -127,11 +127,6 @@ export function BrowserScrollReveal() {
     offset: ['start start', 'end end'],
   })
 
-  // Scroll timeline — animations complete by ~0.30, hold for the rest
-  // 0.00 – 0.28  lid opens
-  // 0.28 – 0.35  labels appear
-  // 0.35 – 1.00  hold
-
   const lidAngle       = useTransform(scrollYProgress, [0.05, 0.30], [-178, -10])
   const shadowOpacity  = useTransform(scrollYProgress, [0.22, 0.32], [0, 0.65])
   const screenGlow     = useTransform(scrollYProgress, [0.22, 0.32], [0, 1])
@@ -152,20 +147,16 @@ export function BrowserScrollReveal() {
   const labelRX       = useTransform(scrollYProgress, [0.34, 0.40], [14, 0])
 
   return (
-    /* Very tall section — ~65% is hold time after animation completes */
     <section ref={sectionRef} className="relative bg-ink-950" style={{ minHeight: '600vh' }}>
 
-      {/* Sticky viewport — content stays centered while user scrolls */}
       <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
 
-        {/* Ambient background glow */}
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse at 50% 70%, rgba(34,197,94,0.05) 0%, transparent 60%)' }}
         />
 
-        {/* ── Headline ── */}
         <div className="text-center mb-16 px-6 relative z-10">
           <p className="mono-eyebrow mb-5">▶ watch it in action</p>
           <h2
@@ -179,11 +170,9 @@ export function BrowserScrollReveal() {
           </p>
         </div>
 
-        {/* ── Laptop + labels ── */}
         <div className="relative w-full px-4 lg:px-20">
           <div className="relative mx-auto" style={{ maxWidth: 1080 }}>
 
-            {/* Label — left */}
             <motion.div
               style={{ opacity: labelLOpacity, x: labelLX }}
               className="absolute left-0 top-[38%] -translate-y-1/2 z-10 hidden lg:flex items-center gap-2"
@@ -194,7 +183,6 @@ export function BrowserScrollReveal() {
               <div className="w-5 h-px bg-ember/30" />
             </motion.div>
 
-            {/* Label — top center */}
             <motion.div
               style={{ opacity: labelTOpacity, y: labelTY }}
               className="absolute left-1/2 -translate-x-1/2 -top-8 z-10 hidden lg:block"
@@ -204,7 +192,6 @@ export function BrowserScrollReveal() {
               </span>
             </motion.div>
 
-            {/* Label — right */}
             <motion.div
               style={{ opacity: labelROpacity, x: labelRX }}
               className="absolute right-0 top-[38%] -translate-y-1/2 z-10 hidden lg:flex items-center gap-2"
@@ -215,19 +202,16 @@ export function BrowserScrollReveal() {
               </span>
             </motion.div>
 
-            {/* ── 3-D Laptop ── */}
             <div
               className="relative"
               style={{ perspective: '1400px', perspectiveOrigin: '50% 25%' }}
             >
-              {/* Laptop group — elevated 3/4 view so base is clearly visible */}
               <div
                 style={{
                   transformStyle: 'preserve-3d',
                   transform: 'rotateX(26deg)',
                 }}
               >
-                {/* ── LID (scroll-driven, card-flip technique) ── */}
                 <motion.div
                   style={{
                     transformStyle: 'preserve-3d',
@@ -238,7 +222,6 @@ export function BrowserScrollReveal() {
                     willChange: 'transform',
                   }}
                 >
-                  {/* ── BACK FACE: metal lid (visible when closed) ── */}
                   <div
                     style={{
                       position: 'absolute',
@@ -254,7 +237,6 @@ export function BrowserScrollReveal() {
                       justifyContent: 'center',
                     }}
                   >
-                    {/* Subtle brand mark */}
                     <div style={{
                       width: 18, height: 22,
                       background: 'rgba(255,255,255,0.03)',
@@ -263,7 +245,6 @@ export function BrowserScrollReveal() {
                     }} />
                   </div>
 
-                  {/* ── FRONT FACE: screen (visible when open) ── */}
                   <motion.div
                     style={{
                       background: 'linear-gradient(165deg, #1e2231 0%, #181c27 100%)',
@@ -275,7 +256,6 @@ export function BrowserScrollReveal() {
                       backfaceVisibility: 'hidden',
                     }}
                   >
-                    {/* Webcam dot */}
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
                       <div
                         style={{
@@ -289,7 +269,6 @@ export function BrowserScrollReveal() {
                       />
                     </div>
 
-                    {/* Screen glass */}
                     <div
                       style={{
                         borderRadius: '5px 5px 0 0',
@@ -297,7 +276,6 @@ export function BrowserScrollReveal() {
                         background: '#05070b',
                       }}
                     >
-                      {/* Browser chrome bar */}
                       <div
                         style={{
                           display: 'flex',
@@ -326,21 +304,13 @@ export function BrowserScrollReveal() {
                           }}
                         >
                           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4a5568' }}>
-                            intervue.app / session · Two Sum
+                            intervue.org / session · Two Sum
                           </span>
                         </div>
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#22c55e', flexShrink: 0 }}>● LIVE</span>
                       </div>
 
-                      {/* Three-panel layout */}
-                      <div
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: '160px 1fr 155px',
-                          minHeight: 290,
-                          overflow: 'hidden',
-                        }}
-                      >
+                      <div className="laptop-grid">
                         <ProblemPanel />
                         <div style={{ minWidth: 0, overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
                           <EditorPanel />
@@ -351,7 +321,6 @@ export function BrowserScrollReveal() {
                   </motion.div>
                 </motion.div>
 
-                {/* ── BASE ── */}
                 <div
                   style={{
                     background: 'linear-gradient(180deg, #1b1e2c 0%, #141620 100%)',
@@ -369,7 +338,6 @@ export function BrowserScrollReveal() {
                     overflow: 'hidden',
                   }}
                 >
-                  {/* Hinge bar */}
                   <div
                     style={{
                       position: 'absolute',
@@ -381,7 +349,6 @@ export function BrowserScrollReveal() {
                       borderRadius: '0 0 6px 6px',
                     }}
                   />
-                  {/* Keyboard row hint */}
                   <div style={{ display: 'flex', gap: 3, opacity: 0.16 }}>
                     {Array.from({ length: 13 }).map((_, i) => (
                       <div
@@ -395,7 +362,6 @@ export function BrowserScrollReveal() {
                       />
                     ))}
                   </div>
-                  {/* Trackpad */}
                   <div
                     style={{
                       width: 86,
@@ -408,7 +374,6 @@ export function BrowserScrollReveal() {
                 </div>
               </div>
 
-              {/* Ground shadow */}
               <motion.div
                 aria-hidden
                 style={{
@@ -425,7 +390,6 @@ export function BrowserScrollReveal() {
               />
             </div>
 
-            {/* Green screen glow beneath */}
             <motion.div
               aria-hidden
               style={{ opacity: screenGlow, width: '55%' }}
@@ -442,7 +406,6 @@ export function BrowserScrollReveal() {
           </div>
         </div>
 
-        {/* Scroll hint — fades out once user starts scrolling */}
         <motion.div
           style={{ opacity: scrollHintOpacity }}
           className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
